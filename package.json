@@ -1,0 +1,30 @@
+{
+  "name": "travel-event-recommender",
+  "version": "1.0.0",
+  "description": "A travel and event recommendation website with user ratings and reviews",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx http-server -p 3000 -c-1",
+    "dev": "npx http-server -p 3000 -c-1 -o",
+    "build": "echo 'No build process needed for static site'",
+    "deploy": "echo 'Ready for deployment to any static hosting service'"
+  },
+  "keywords": [
+    "travel",
+    "events",
+    "recommendations",
+    "ratings",
+    "reviews",
+    "javascript",
+    "html",
+    "css"
+  ],
+  "author": "Travel Event Recommender",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

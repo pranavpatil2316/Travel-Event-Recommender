@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travel + Event Hybrid Recommender</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="database.js"></script>
+    <script src="sample_reviews.js"></script>
+    <style>
+        #map { height: 400px; }
+        .event-card {
+            transition: transform 0.2s ease-in-out;
+        }
+        .event-card:hover {
+            transform: translateY(-2px);
+        }
+        .score-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .interest-category {
+            transition: all 0.3s ease;
+        }
+        .interest-category:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .popup-content {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            margin: 20px;
+        }
+        .star-rating {
+            display: inline-flex;
+            gap: 2px;
+        }
+        .star {
+            cursor: pointer;
+            font-size: 20px;
+            color: #d1d5db;
+            transition: color 0.2s;
+        }
+        .star.active {
+            color: #fbbf24;
+        }
+        .star:hover {
+            color: #f59e0b;
+        }
+        .review-card {
+            border-left: 4px solid #3b82f6;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-8">
+        <div class="container mx-auto px-4 text-center">
+            <h1 class="text-4xl font-bold mb-2">Travel + Event Hybrid Recommender</h1>
+            <p class="text-lg opacity-90">Discover amazing events and hidden gems during your travels</p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Form Section -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+            <h2 class="text-2xl font-semibold mb-6 text-gray-800">Plan Your Trip</h2>
+            <form id="recommendationForm" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Country -->
+                    <div>
+                        <label for="country" class="block text-sm font-medium text-gray-700 mb-2">Country</label>
+                        <select id="country" name="country" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                            <option value="">Select a country...</option>
+                            <option value="France">France</option>
+                            <option value="Japan">Japan</option>
+                            <option value="United Kingdom">United Kingdom</option>
+                            <option value="Italy">Italy</option>
+                            <option value="Spain">Spain</option>
+                            <option value="Germany">Germany</option>
+                            <option value="United States">United States</option>
+                            <option value="Canada">Canada</option>
+                            <option value="Australia">Australia</option>
+                            <option value="India">India</option>
+                            <option value="Thailand">Thailand</option>
+                            <option value="Brazil">Brazil</option>
+                            <option value="Mexico">Mexico</option>
+                            <option value="South Korea">South Korea</option>
+                            <option value="Singapore">Singapore</option>
+                        </select>
+                    </div>
+
+                    <!-- City -->
+                    <div>
+                        <label for="city" class="block text-sm font-medium text-gray-700 mb-2">City (Optional)</label>
+                        <select id="city" name="city" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" disabled>
+                            <option value="">Select a country first...</option>
+                        </select>
+                        <div id="cityLoading" class="hidden text-sm text-gray-500 mt-1">Loading cities...</div>
+                        <p class="text-xs text-gray-500 mt-1">Leave empty to see events from all cities in the country</p>
+                    </div>
+
+                    <!-- Season -->
+                    <div>
+                        <label for="season" class="block text-sm font-medium text-gray-700 mb-2">Travel Season</label>
+                        <select id="season" name="season" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                            <option value="">Select a season...</option>
+                            <option value="spring">Spring (Mar-May)</option>
+                            <option value="summer">Summer (Jun-Aug)</option>
+                            <option value="autumn">Autumn (Sep-Nov)</option>
+                            <option value="winter">Winter (Dec-Feb)</option>
+                        </select>
+                    </div>
+
+                    <!-- Duration -->
+                    <div>
+                        <label for="duration" class="block text-sm font-medium text-gray-700 mb-2">Trip Duration</label>
+                        <select id="duration" name="duration" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                            <option value="">Select duration...</option>
+                            <option value="weekend">Weekend (2-3 days)</option>
+                            <option value="week">Week (5-7 days)</option>
+                            <option value="extended">Extended (10+ days)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex justify-center pt-4">
+                    <button type="submit" class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-105">
+                        Show All Events
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsSection" class="hidden">
+            <!-- Loading State -->
+            <div id="loadingState" class="text-center py-8">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <p class="mt-2 text-gray-600">Loading all events for your destination...</p>
+            </div>
+
+            <!-- Error State -->
+            <div id="errorState" class="hidden bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-red-800">No data available</h3>
+                        <div class="mt-2 text-sm text-red-700">
+                            <p id="errorMessage">No sample data for this city yet.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Content -->
+            <div id="resultsContent" class="hidden">
+                <!-- Summary -->
+                <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+                    <h2 class="text-2xl font-semibold mb-4 text-gray-800">All Events in Your Destination</h2>
+                    <div id="summaryStats" class="grid grid-cols-1 md:grid-cols-4 gap-4 text-center">
+                        <!-- Stats will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Interest Categories -->
+                <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-800">Events by Interest Category</h3>
+                    <div id="interestCategories" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <!-- Interest categories will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Upcoming Events -->
+                <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-800">Upcoming Events</h3>
+                    <div class="mb-4">
+                        <label for="upcomingDays" class="block text-sm font-medium text-gray-700 mb-2">Show events for next:</label>
+                        <select id="upcomingDays" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="7">7 days</option>
+                            <option value="30" selected>30 days</option>
+                            <option value="90">90 days</option>
+                        </select>
+                    </div>
+                    <div id="upcomingEvents" class="space-y-4">
+                        <!-- Upcoming events will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Events List -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Events -->
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h3 class="text-xl font-semibold mb-4 text-gray-800">All Events</h3>
+                        <div id="eventsList" class="space-y-4">
+                            <!-- Events will be populated by JavaScript -->
+                        </div>
+                    </div>
+
+                    <!-- Map -->
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h3 class="text-xl font-semibold mb-4 text-gray-800">Event Locations</h3>
+                        <div id="map" class="rounded-lg"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-6 mt-12">
+        <div class="container mx-auto px-4 text-center">
+            <p class="text-gray-400">Built with ❤️ using TailwindCSS, LeafletJS, and pure JavaScript</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
