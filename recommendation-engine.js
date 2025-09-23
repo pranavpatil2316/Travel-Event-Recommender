@@ -33,6 +33,7 @@ class RecommendationEngine {
             return await response.json();
         } catch (error) {
             console.error('Error fetching user ratings:', error);
+            console.log('Falling back to empty ratings for user:', userId);
             return [];
         }
     }

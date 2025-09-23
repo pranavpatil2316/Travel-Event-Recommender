@@ -25,9 +25,59 @@ class SharedEventDatabase {
             }
             return await response.json();
         } catch (error) {
-            console.error('Error fetching events:', error);
-            return [];
+            console.error('Error fetching events from shared database:', error);
+            console.log('Falling back to sample data...');
+            // Fallback to sample data if shared database is not available
+            return this.getSampleEvents(city, category);
         }
+    }
+
+    // Fallback to sample events when shared database is not available
+    getSampleEvents(city = null, category = null) {
+        const sampleEvents = [
+            {
+                id: 'sample-1',
+                name: 'Tokyo Food Tour',
+                description: 'Explore the culinary delights of Tokyo',
+                city: 'Tokyo',
+                country: 'Japan',
+                category: 'Food & Dining',
+                indoor: false,
+                price: 50,
+                duration: '3 hours',
+                rating: 4.5,
+                reviews: 120
+            },
+            {
+                id: 'sample-2',
+                name: 'Paris Art Museum',
+                description: 'Visit world-famous art museums in Paris',
+                city: 'Paris',
+                country: 'France',
+                category: 'Arts & Culture',
+                indoor: true,
+                price: 25,
+                duration: '2 hours',
+                rating: 4.8,
+                reviews: 89
+            }
+        ];
+
+        let filteredEvents = sampleEvents;
+        
+        if (city) {
+            filteredEvents = filteredEvents.filter(event => 
+                event.city.toLowerCase().includes(city.toLowerCase())
+            );
+        }
+        
+        if (category) {
+            filteredEvents = filteredEvents.filter(event => 
+                event.category.toLowerCase().includes(category.toLowerCase())
+            );
+        }
+
+        return filteredEvents;
     }
 
     async addEvent(event) {

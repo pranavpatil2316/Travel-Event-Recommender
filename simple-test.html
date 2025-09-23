@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Test - Travel Recommender</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-center mb-8">Simple Test - Travel Recommender</h1>
+        
+        <div class="bg-white p-6 rounded-lg shadow-lg mb-6">
+            <h2 class="text-xl font-semibold mb-4">Test Form</h2>
+            <form id="testForm">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Country</label>
+                    <select id="country" class="w-full p-2 border border-gray-300 rounded-md">
+                        <option value="">Select a country...</option>
+                        <option value="Japan">Japan</option>
+                        <option value="France">France</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">City</label>
+                    <select id="city" class="w-full p-2 border border-gray-300 rounded-md">
+                        <option value="">Select a city...</option>
+                        <option value="Tokyo">Tokyo</option>
+                        <option value="Paris">Paris</option>
+                    </select>
+                </div>
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                    Test Form Submission
+                </button>
+            </form>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+            <h2 class="text-xl font-semibold mb-4">Results</h2>
+            <div id="results" class="bg-gray-50 p-4 rounded-md">
+                <p>No results yet...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simple test without external dependencies
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded');
+            
+            const form = document.getElementById('testForm');
+            const results = document.getElementById('results');
+            
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                console.log('Form submitted - preventDefault() worked!');
+                
+                const country = document.getElementById('country').value;
+                const city = document.getElementById('city').value;
+                
+                console.log('Country:', country);
+                console.log('City:', city);
+                
+                results.innerHTML = `
+                    <div class="text-green-600">
+                        <h3 class="font-semibold">Form submitted successfully!</h3>
+                        <p>Country: ${country}</p>
+                        <p>City: ${city}</p>
+                        <p>Time: ${new Date().toLocaleTimeString()}</p>
+                    </div>
+                `;
+            });
+        });
+    </script>
+</body>
+</html>

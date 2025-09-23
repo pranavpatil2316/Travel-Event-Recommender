@@ -122,6 +122,7 @@ function initializeForm() {
     // Handle form submission
     form.addEventListener('submit', function(e) {
         e.preventDefault();
+        console.log('Form submitted - preventDefault() worked!');
         handleFormSubmission();
         return false;
     });
@@ -237,6 +238,8 @@ function handleFormSubmission() {
     const season = formData.get('season');
     const duration = formData.get('duration');
 
+    console.log('Form submission started:', { country, city, season, duration });
+
     if (!country || !season || !duration) {
         alert('Please fill in country, season, and duration fields');
         return;
@@ -249,24 +252,48 @@ function handleFormSubmission() {
     // Simulate processing delay for better UX
     setTimeout(async () => {
         try {
+            console.log('Attempting to get recommendations...');
+            
             // Try to get personalized recommendations first
             if (recommendationEngine && currentUser) {
+                console.log('Recommendation engine and user available, generating recommendations...');
                 const recommendations = await recommendationEngine.generateRecommendations(
                     currentUser.id, country, city, 10
                 );
                 
                 if (recommendations && recommendations.length > 0) {
+                    console.log('Recommendations found:', recommendations.length);
                     await displayRecommendations(recommendations, city || 'All Cities', country, season);
                     return;
+                } else {
+                    console.log('No recommendations found, falling back to regular events');
                 }
+            } else {
+                console.log('Recommendation engine or user not available, using fallback');
             }
             
             // Fallback to regular events if no recommendations
+            console.log('Loading regular events...');
             const allEvents = await getAllEventsForCountryOrCity(country, city, season, duration);
+            console.log('Events loaded:', allEvents.length);
             await displayResults(allEvents, city || 'All Cities', country, season);
         } catch (error) {
             console.error('Error in form submission:', error);
-            alert('Error loading events. Please try again.');
+            // Show a more user-friendly error message
+            document.getElementById('resultsSection').innerHTML = `
+                <div class="text-center py-8">
+                    <div class="text-red-600 mb-4">
+                        <svg class="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">Error Loading Events</h3>
+                    <p class="text-gray-600 mb-4">We're having trouble loading events right now. Please try again.</p>
+                    <button onclick="location.reload()" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                        Reload Page
+                    </button>
+                </div>
+            `;
         }
     }, 1000);
 }
