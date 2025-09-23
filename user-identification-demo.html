@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Identification Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8 text-center">User Identification Demo</h1>
+        
+        <!-- Current User Info -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+            <h2 class="text-xl font-semibold mb-4">Current User Information</h2>
+            <div id="userInfo" class="space-y-2">
+                <p><strong>User ID:</strong> <span id="userId">Loading...</span></p>
+                <p><strong>Device Info:</strong> <span id="deviceInfo">Loading...</span></p>
+                <p><strong>Browser Fingerprint:</strong> <span id="fingerprint">Loading...</span></p>
+                <p><strong>Created:</strong> <span id="createdAt">Loading...</span></p>
+            </div>
+        </div>
+
+        <!-- User Statistics -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+            <h2 class="text-xl font-semibold mb-4">User Statistics</h2>
+            <div id="userStats" class="space-y-2">
+                <p><strong>Total Ratings:</strong> <span id="totalRatings">Loading...</span></p>
+                <p><strong>Average Rating:</strong> <span id="averageRating">Loading...</span></p>
+                <p><strong>Favorite Category:</strong> <span id="favoriteCategory">Loading...</span></p>
+                <p><strong>Recommendation Ready:</strong> <span id="recommendationReady">Loading...</span></p>
+            </div>
+        </div>
+
+        <!-- Test Different Scenarios -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+            <h2 class="text-xl font-semibold mb-4">Test Scenarios</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <button onclick="simulateNewUser()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    Simulate New User
+                </button>
+                <button onclick="simulateReturningUser()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                    Simulate Returning User
+                </button>
+                <button onclick="simulateDifferentDevice()" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">
+                    Simulate Different Device
+                </button>
+                <button onclick="clearUserData()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                    Clear User Data
+                </button>
+            </div>
+        </div>
+
+        <!-- User Identification Methods -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-xl font-semibold mb-4">User Identification Methods</h2>
+            <div class="space-y-4">
+                <div class="border-l-4 border-blue-500 pl-4">
+                    <h3 class="font-semibold text-blue-700">1. Enhanced Session-Based (Current)</h3>
+                    <p class="text-gray-600">Uses browser fingerprinting + localStorage for better persistence</p>
+                    <ul class="list-disc list-inside text-sm text-gray-500 mt-2">
+                        <li>No login required</li>
+                        <li>Works across browser sessions</li>
+                        <li>Survives browser restarts</li>
+                        <li>Lost if user clears browser data</li>
+                    </ul>
+                </div>
+                
+                <div class="border-l-4 border-green-500 pl-4">
+                    <h3 class="font-semibold text-green-700">2. Anonymous User Codes</h3>
+                    <p class="text-gray-600">6-digit codes like "ABC123" for easy access</p>
+                    <ul class="list-disc list-inside text-sm text-gray-500 mt-2">
+                        <li>No login required</li>
+                        <li>Works across devices</li>
+                        <li>Users need to remember code</li>
+                        <li>Good for family sharing</li>
+                    </ul>
+                </div>
+                
+                <div class="border-l-4 border-purple-500 pl-4">
+                    <h3 class="font-semibold text-purple-700">3. Social Login (Google/Facebook)</h3>
+                    <p class="text-gray-600">Professional OAuth integration</p>
+                    <ul class="list-disc list-inside text-sm text-gray-500 mt-2">
+                        <li>Professional appearance</li>
+                        <li>Works across all devices</li>
+                        <li>Requires OAuth setup</li>
+                        <li>Users need social accounts</li>
+                    </ul>
+                </div>
+                
+                <div class="border-l-4 border-orange-500 pl-4">
+                    <h3 class="font-semibold text-orange-700">4. Email-Based Login</h3>
+                    <p class="text-gray-600">Traditional email + password system</p>
+                    <ul class="list-disc list-inside text-sm text-gray-500 mt-2">
+                        <li>Most secure</li>
+                        <li>Works across all devices</li>
+                        <li>Requires registration</li>
+                        <li>Password management needed</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced User Management (simplified version for demo)
+        class UserIdentificationDemo {
+            constructor() {
+                this.currentUser = null;
+            }
+
+            generateBrowserFingerprint() {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                ctx.textBaseline = 'top';
+                ctx.font = '14px Arial';
+                ctx.fillText('Browser fingerprint', 2, 2);
+                
+                const fingerprint = [
+                    navigator.userAgent,
+                    navigator.language,
+                    screen.width + 'x' + screen.height,
+                    new Date().getTimezoneOffset(),
+                    canvas.toDataURL()
+                ].join('|');
+                
+                return this.simpleHash(fingerprint).toString(36);
+            }
+
+            simpleHash(str) {
+                let hash = 0;
+                for (let i = 0; i < str.length; i++) {
+                    const char = str.charCodeAt(i);
+                    hash = ((hash << 5) - hash) + char;
+                    hash = hash & hash;
+                }
+                return Math.abs(hash);
+            }
+
+            generateUserId() {
+                const fingerprint = this.generateBrowserFingerprint();
+                const timestamp = Date.now();
+                const random = Math.random().toString(36).substr(2, 9);
+                return `user_${fingerprint}_${timestamp}_${random}`;
+            }
+
+            getDeviceInfo() {
+                return {
+                    userAgent: navigator.userAgent,
+                    language: navigator.language,
+                    platform: navigator.platform,
+                    screenResolution: `${screen.width}x${screen.height}`,
+                    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                    timestamp: new Date().toISOString()
+                };
+            }
+
+            async getCurrentUser() {
+                if (this.currentUser) {
+                    return this.currentUser;
+                }
+
+                let userId = localStorage.getItem('demoUserId');
+                let userData = null;
+
+                if (userId) {
+                    userData = JSON.parse(localStorage.getItem('demoUserData') || '{}');
+                } else {
+                    userId = this.generateUserId();
+                    userData = {
+                        id: userId,
+                        created_at: new Date().toISOString(),
+                        device_info: this.getDeviceInfo(),
+                        ratings: []
+                    };
+                    localStorage.setItem('demoUserId', userId);
+                    localStorage.setItem('demoUserData', JSON.stringify(userData));
+                }
+
+                this.currentUser = userData;
+                return userData;
+            }
+
+            async updateUserInfo() {
+                const user = await this.getCurrentUser();
+                
+                document.getElementById('userId').textContent = user.id;
+                document.getElementById('deviceInfo').textContent = 
+                    `${user.device_info.platform} - ${user.device_info.screenResolution}`;
+                document.getElementById('fingerprint').textContent = 
+                    user.id.split('_')[1];
+                document.getElementById('createdAt').textContent = 
+                    new Date(user.created_at).toLocaleString();
+                
+                // Update stats
+                document.getElementById('totalRatings').textContent = user.ratings.length;
+                document.getElementById('averageRating').textContent = 
+                    user.ratings.length > 0 ? 
+                    (user.ratings.reduce((sum, r) => sum + r.rating, 0) / user.ratings.length).toFixed(1) : 
+                    'N/A';
+                document.getElementById('favoriteCategory').textContent = 
+                    this.getFavoriteCategory(user.ratings) || 'N/A';
+                document.getElementById('recommendationReady').textContent = 
+                    user.ratings.length >= 3 ? 'Yes' : 'No';
+            }
+
+            getFavoriteCategory(ratings) {
+                if (ratings.length === 0) return null;
+                
+                const categoryRatings = {};
+                ratings.forEach(rating => {
+                    const category = rating.category;
+                    if (!categoryRatings[category]) {
+                        categoryRatings[category] = { total: 0, count: 0 };
+                    }
+                    categoryRatings[category].total += rating.rating;
+                    categoryRatings[category].count += 1;
+                });
+
+                let favoriteCategory = null;
+                let highestAvg = 0;
+
+                Object.keys(categoryRatings).forEach(category => {
+                    const avg = categoryRatings[category].total / categoryRatings[category].count;
+                    if (avg > highestAvg) {
+                        highestAvg = avg;
+                        favoriteCategory = category;
+                    }
+                });
+
+                return favoriteCategory;
+            }
+
+            clearUserData() {
+                localStorage.removeItem('demoUserId');
+                localStorage.removeItem('demoUserData');
+                this.currentUser = null;
+                this.updateUserInfo();
+            }
+
+            simulateNewUser() {
+                this.clearUserData();
+                this.getCurrentUser();
+                this.updateUserInfo();
+                alert('New user created!');
+            }
+
+            simulateReturningUser() {
+                // Add some sample ratings
+                const user = this.currentUser;
+                if (user) {
+                    user.ratings = [
+                        { category: 'Art & Culture', rating: 5 },
+                        { category: 'Food & Drink', rating: 4 },
+                        { category: 'Adventure & Sports', rating: 3 }
+                    ];
+                    localStorage.setItem('demoUserData', JSON.stringify(user));
+                    this.updateUserInfo();
+                    alert('Sample ratings added!');
+                }
+            }
+
+            simulateDifferentDevice() {
+                // Simulate different device by changing screen resolution
+                const user = this.currentUser;
+                if (user) {
+                    user.device_info.screenResolution = '1920x1080';
+                    user.device_info.platform = 'Win32';
+                    localStorage.setItem('demoUserData', JSON.stringify(user));
+                    this.updateUserInfo();
+                    alert('Device info updated!');
+                }
+            }
+        }
+
+        // Initialize demo
+        const demo = new UserIdentificationDemo();
+        
+        // Update user info on page load
+        window.addEventListener('load', () => {
+            demo.getCurrentUser().then(() => {
+                demo.updateUserInfo();
+            });
+        });
+
+        // Global functions for buttons
+        function simulateNewUser() {
+            demo.simulateNewUser();
+        }
+
+        function simulateReturningUser() {
+            demo.simulateReturningUser();
+        }
+
+        function simulateDifferentDevice() {
+            demo.simulateDifferentDevice();
+        }
+
+        function clearUserData() {
+            demo.clearUserData();
+        }
+    </script>
+</body>
+</html>

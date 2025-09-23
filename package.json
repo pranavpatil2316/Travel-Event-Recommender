@@ -1,0 +1,24 @@
+{
+  "name": "travel-event-recommender",
+  "version": "1.0.0",
+  "description": "Travel and Event Recommender Website",
+  "main": "index.html",
+  "scripts": {
+    "build": "echo 'No build step required for static site'",
+    "dev": "netlify dev"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.38.0"
+  },
+  "devDependencies": {
+    "netlify-cli": "^17.0.0"
+  },
+  "keywords": [
+    "travel",
+    "events",
+    "recommender",
+    "netlify"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}
