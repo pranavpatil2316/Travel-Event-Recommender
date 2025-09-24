@@ -986,68 +986,12 @@
                 const cities = Object.keys(eventsByCity);
                 console.log('Events grouped by cities:', cities);
                 
+                // Create a simple map header and summary only
                 let mapHTML = `
                     <div class="w-full">
                         <div class="text-center mb-6">
                             <h3 class="text-2xl font-bold text-gray-800 mb-2">🗺️ Event Locations Map</h3>
                             <p class="text-gray-600">Showing ${events.length} events across ${cities.length} cities</p>
-                        </div>
-                        
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                `;
-                
-                // Create a city section for each city
-                cities.forEach(city => {
-                    const cityEvents = eventsByCity[city];
-                    const avgRating = (cityEvents.reduce((sum, event) => sum + event.rating, 0) / cityEvents.length).toFixed(1);
-                    
-                    mapHTML += `
-                        <div class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm hover:shadow-md transition-shadow">
-                            <div class="flex items-center justify-between mb-3">
-                                <h4 class="text-lg font-semibold text-gray-800">📍 ${city}</h4>
-                                <div class="flex items-center space-x-2">
-                                    <span class="bg-blue-100 text-blue-800 text-sm px-2 py-1 rounded-full">${cityEvents.length} events</span>
-                                    <span class="bg-yellow-100 text-yellow-800 text-sm px-2 py-1 rounded-full">${avgRating} ⭐ avg</span>
-                                </div>
-                            </div>
-                            
-                            <div class="space-y-3">
-                    `;
-                    
-                    cityEvents.forEach(event => {
-                        mapHTML += `
-                            <div class="bg-gray-50 rounded-lg p-3 border border-gray-100">
-                                <div class="flex justify-between items-start mb-2">
-                                    <h5 class="font-medium text-gray-800 text-sm">${event.title}</h5>
-                                    <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">${event.rating.toFixed(1)} ⭐</span>
-                                </div>
-                                <p class="text-xs text-gray-600 mb-2 line-clamp-2">${event.description}</p>
-                                <div class="flex items-center justify-between text-xs text-gray-500 mb-2">
-                                    <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded">${event.category}</span>
-                                    <span class="text-gray-400">${event.indoor_outdoor === 'indoor' ? '🏠' : '🌳'} ${event.indoor_outdoor}</span>
-                                </div>
-                                <div class="text-xs text-gray-400 mb-2">
-                                    📍 Coordinates: ${event.lat.toFixed(4)}, ${event.lon.toFixed(4)}
-                                </div>
-                                <div class="flex space-x-2">
-                                    <button onclick="showEventDetails(${event.id})" class="bg-blue-500 text-white text-xs px-3 py-1 rounded hover:bg-blue-600 flex-1">
-                                        View Details
-                                    </button>
-                                    <button onclick="showEventReviews(${event.id})" class="bg-green-500 text-white text-xs px-3 py-1 rounded hover:bg-green-600 flex-1">
-                                        Reviews (${event.reviews ? event.reviews.length : 0})
-                                    </button>
-                                </div>
-                            </div>
-                        `;
-                    });
-                    
-                    mapHTML += `
-                            </div>
-                        </div>
-                    `;
-                });
-                
-                mapHTML += `
                         </div>
                         
                         <div class="mt-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4">
@@ -1071,11 +1015,15 @@
                                 </div>
                             </div>
                         </div>
+                        
+                        <div class="mt-6 text-center">
+                            <p class="text-gray-600 text-sm">Interactive map will appear below if Leaflet library loads successfully</p>
+                        </div>
                     </div>
                 `;
                 
                 mapElement.innerHTML = mapHTML;
-                console.log('✅ Visual map created successfully');
+                console.log('✅ Visual map created successfully (cards removed)');
             } else {
                 mapElement.innerHTML = `
                     <div class="text-center py-12">
