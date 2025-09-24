@@ -481,9 +481,12 @@
         function getEventsForCity(city, country, season, cityCoordinates) {
             const baseCoords = cityCoordinates[city] || [0, 0];
             
-            return [
+            // Generate unique IDs based on city name
+            const cityHash = city.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
+            
+            const events = [
                 {
-                    id: 1,
+                    id: cityHash + 1,
                     title: `${city} Cultural Festival`,
                     description: `Experience the rich culture and traditions of ${city} during ${season}. This vibrant festival showcases local arts, music, and traditions.`,
                     category: 'Art & Culture',
@@ -501,7 +504,7 @@
                     ]
                 },
                 {
-                    id: 2,
+                    id: cityHash + 2,
                     title: `${city} Food Tour`,
                     description: `Discover local cuisine and culinary traditions in ${city}. Taste authentic dishes and learn about local food culture.`,
                     category: 'Food & Drink',
@@ -519,7 +522,7 @@
                     ]
                 },
                 {
-                    id: 3,
+                    id: cityHash + 3,
                     title: `${city} Historical Sites`,
                     description: `Explore historical landmarks and heritage sites in ${city}. Learn about the rich history and architecture.`,
                     category: 'History & Heritage',
@@ -537,74 +540,64 @@
                     ]
                 }
             ];
+            
+            // Load stored reviews for each event and merge with default reviews
+            events.forEach(event => {
+                const storedReviews = getStoredReviewsForEvent(event.id);
+                if (storedReviews.length > 0) {
+                    // Merge stored reviews with default reviews
+                    event.reviews = [...event.reviews, ...storedReviews];
+                    
+                    // Recalculate rating based on all reviews
+                    const totalRating = event.reviews.reduce((sum, review) => sum + review.rating, 0);
+                    event.rating = totalRating / event.reviews.length;
+                    event.ratingCount = event.reviews.length;
+                    
+                    console.log(`Loaded ${storedReviews.length} stored reviews for ${event.title}`);
+                }
+            });
+            
+            return events;
         }
         
         function getEventsForCountry(country, season, cityCoordinates) {
             const countryCities = {
-                'France': ['Paris', 'Lyon', 'Marseille'],
-                'Japan': ['Tokyo', 'Osaka', 'Kyoto'],
-                'United Kingdom': ['London', 'Manchester', 'Birmingham'],
-                'Italy': ['Rome', 'Milan', 'Naples'],
-                'Spain': ['Madrid', 'Barcelona', 'Valencia'],
-                'Germany': ['Berlin', 'Munich', 'Hamburg'],
-                'United States': ['New York', 'Los Angeles', 'Chicago'],
-                'Canada': ['Toronto', 'Montreal', 'Vancouver'],
-                'Australia': ['Sydney', 'Melbourne', 'Brisbane'],
-                'India': ['Mumbai', 'Delhi', 'Bangalore'],
-                'Thailand': ['Bangkok', 'Chiang Mai', 'Phuket'],
-                'Brazil': ['São Paulo', 'Rio de Janeiro', 'Brasília'],
-                'Mexico': ['Mexico City', 'Guadalajara', 'Monterrey'],
-                'South Korea': ['Seoul', 'Busan', 'Incheon'],
+                'France': ['Paris', 'Lyon', 'Marseille', 'Nice', 'Toulouse'],
+                'Japan': ['Tokyo', 'Osaka', 'Kyoto', 'Hiroshima', 'Nagoya'],
+                'United Kingdom': ['London', 'Manchester', 'Birmingham', 'Liverpool', 'Edinburgh'],
+                'Italy': ['Rome', 'Milan', 'Naples', 'Florence', 'Venice'],
+                'Spain': ['Madrid', 'Barcelona', 'Seville', 'Valencia', 'Bilbao'],
+                'Germany': ['Berlin', 'Munich', 'Hamburg', 'Cologne', 'Frankfurt'],
+                'United States': ['New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix'],
+                'Canada': ['Toronto', 'Vancouver', 'Montreal', 'Calgary', 'Ottawa'],
+                'Australia': ['Sydney', 'Melbourne', 'Brisbane', 'Perth', 'Adelaide'],
+                'India': ['Mumbai', 'Delhi', 'Bangalore', 'Chennai', 'Kolkata'],
+                'Thailand': ['Bangkok', 'Chiang Mai', 'Phuket', 'Pattaya', 'Krabi'],
+                'Brazil': ['São Paulo', 'Rio de Janeiro', 'Brasília', 'Salvador', 'Fortaleza'],
+                'Mexico': ['Mexico City', 'Guadalajara', 'Monterrey', 'Puebla', 'Tijuana'],
+                'South Korea': ['Seoul', 'Busan', 'Incheon', 'Daegu', 'Daejeon'],
                 'Singapore': ['Singapore']
             };
             
             const cities = countryCities[country] || ['City'];
-            const events = [];
+            let allCountryEvents = [];
+            
+            console.log(`Getting events for ${country} with ${cities.length} cities:`, cities);
             
             cities.forEach((city, cityIndex) => {
-                const baseCoords = cityCoordinates[city] || [0, 0];
-                
-                // Add 2 events per city
-                events.push({
-                    id: cityIndex * 2 + 1,
-                    title: `${city} Cultural Experience`,
-                    description: `Discover the unique culture and traditions of ${city} during ${season}. Experience local arts, music, and customs.`,
-                    category: 'Art & Culture',
-                    city: city,
-                    rating: 4.2 + Math.random() * 0.6,
-                    ratingCount: 10 + Math.floor(Math.random() * 20),
-                    indoor_outdoor: 'outdoor',
-                    lat: baseCoords[0] + (Math.random() - 0.5) * 0.01,
-                    lon: baseCoords[1] + (Math.random() - 0.5) * 0.01,
-                    start_time: new Date().toISOString(),
-                    end_time: new Date(Date.now() + 86400000).toISOString(),
-                    reviews: [
-                        { user_name: 'Sarah M.', rating: 5, review_text: 'Amazing cultural experience!', date: '2024-01-15' },
-                        { user_name: 'James K.', rating: 4, review_text: 'Great festival, very authentic.', date: '2024-01-10' }
-                    ]
-                });
-                
-                events.push({
-                    id: cityIndex * 2 + 2,
-                    title: `${city} Local Cuisine Tour`,
-                    description: `Taste authentic local cuisine and learn about ${city}'s food culture. Perfect for ${season} dining experiences.`,
-                    category: 'Food & Drink',
-                    city: city,
-                    rating: 4.3 + Math.random() * 0.6,
-                    ratingCount: 8 + Math.floor(Math.random() * 25),
-                    indoor_outdoor: 'indoor',
-                    lat: baseCoords[0] + (Math.random() - 0.5) * 0.01,
-                    lon: baseCoords[1] + (Math.random() - 0.5) * 0.01,
-                    start_time: new Date().toISOString(),
-                    end_time: new Date(Date.now() + 7200000).toISOString(),
-                    reviews: [
-                        { user_name: 'Maria G.', rating: 5, review_text: 'Delicious food and great guide!', date: '2024-01-12' },
-                        { user_name: 'David W.', rating: 4, review_text: 'Excellent food tour experience.', date: '2024-01-08' }
-                    ]
-                });
+                const cityEvents = getEventsForCity(city, country, season, cityCoordinates);
+                console.log(`City ${city}: ${cityEvents.length} events`);
+                allCountryEvents = allCountryEvents.concat(cityEvents);
             });
             
-            return events;
+            console.log(`Total events for ${country}: ${allCountryEvents.length}`);
+            
+            // Sort by rating (highest first)
+            allCountryEvents.sort((a, b) => b.rating - a.rating);
+            
+            console.log(`Events sorted by rating. Top 3:`, allCountryEvents.slice(0, 3).map(e => `${e.title} (${e.rating}⭐)`));
+            
+            return allCountryEvents;
         }
         
         function displayInlineResults(events, city, country, season) {
@@ -694,6 +687,43 @@
         
         // Global events storage
         let currentEvents = [];
+        
+        // Load stored ratings and reviews from localStorage
+        function loadStoredReviews() {
+            try {
+                const stored = localStorage.getItem('eventReviews');
+                return stored ? JSON.parse(stored) : {};
+            } catch (error) {
+                console.error('Error loading stored reviews:', error);
+                return {};
+            }
+        }
+        
+        // Save ratings and reviews to localStorage
+        function saveStoredReviews(reviews) {
+            try {
+                localStorage.setItem('eventReviews', JSON.stringify(reviews));
+                console.log('Reviews saved to localStorage');
+            } catch (error) {
+                console.error('Error saving reviews:', error);
+            }
+        }
+        
+        // Get stored reviews for an event
+        function getStoredReviewsForEvent(eventId) {
+            const storedReviews = loadStoredReviews();
+            return storedReviews[eventId] || [];
+        }
+        
+        // Add review to stored reviews
+        function addStoredReview(eventId, review) {
+            const storedReviews = loadStoredReviews();
+            if (!storedReviews[eventId]) {
+                storedReviews[eventId] = [];
+            }
+            storedReviews[eventId].push(review);
+            saveStoredReviews(storedReviews);
+        }
         
         // Format date and time for display
         function formatDateTime(dateTimeString) {
@@ -805,23 +835,31 @@
                 return;
             }
             
+            // Create the review object
+            const newReview = {
+                user_name: userName,
+                rating: selectedRating,
+                review_text: reviewText.trim(),
+                date: new Date().toLocaleDateString()
+            };
+            
+            // Save to localStorage
+            addStoredReview(eventId, newReview);
+            
             // Find the event and add the review
             const event = currentEvents.find(e => e.id === eventId);
             if (event) {
-                event.reviews.push({
-                    user_name: userName,
-                    rating: selectedRating,
-                    review_text: reviewText.trim(),
-                    date: new Date().toLocaleDateString()
-                });
+                event.reviews.push(newReview);
                 
                 // Update rating
                 const totalRating = event.reviews.reduce((sum, review) => sum + review.rating, 0);
                 event.rating = totalRating / event.reviews.length;
                 event.ratingCount = event.reviews.length;
+                
+                console.log(`Added review for ${event.title}: ${selectedRating} stars by ${userName}`);
             }
             
-            alert('Thank you for your rating and review!');
+            alert('Thank you for your rating and review! It has been saved.');
             
             // Close popup
             document.querySelector('.popup-overlay').remove();
@@ -1014,31 +1052,39 @@
         
         function createFallbackMap(events, mapElement) {
             console.log('Creating fallback map with', events.length, 'events');
+            console.log('Map element:', mapElement);
+            console.log('Map element dimensions:', mapElement.offsetWidth, 'x', mapElement.offsetHeight);
+            
+            // Ensure map element is visible
+            mapElement.style.minHeight = '400px';
+            mapElement.style.backgroundColor = '#f3f4f6';
+            mapElement.style.border = '2px solid #e5e7eb';
+            mapElement.style.borderRadius = '8px';
             
             // Create a simple HTML-based map representation
-            let mapHTML = '<div class="bg-gray-100 rounded-lg p-4">';
-            mapHTML += '<h3 class="text-lg font-semibold mb-4 text-gray-800">Event Locations</h3>';
+            let mapHTML = '<div class="bg-gray-100 rounded-lg p-4 h-full">';
+            mapHTML += '<h3 class="text-lg font-semibold mb-4 text-gray-800">📍 Event Locations Map</h3>';
             
             if (events && events.length > 0) {
-                mapHTML += '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">';
+                mapHTML += '<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">';
                 
                 events.forEach(event => {
                     if (event.lat && event.lon && event.lat !== 0 && event.lon !== 0) {
                         mapHTML += `
-                            <div class="bg-white p-3 rounded-lg border border-gray-200">
+                            <div class="bg-white p-3 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
                                 <div class="flex justify-between items-start mb-2">
-                                    <h4 class="font-semibold text-gray-800">${event.title}</h4>
-                                    <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">${event.rating.toFixed(1)} ⭐</span>
+                                    <h4 class="font-semibold text-gray-800 text-sm">${event.title}</h4>
+                                    <span class="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">${event.rating.toFixed(1)} ⭐</span>
                                 </div>
-                                <p class="text-sm text-gray-600 mb-2">${event.description}</p>
+                                <p class="text-xs text-gray-600 mb-2 line-clamp-2">${event.description}</p>
                                 <div class="flex items-center justify-between text-xs text-gray-500 mb-2">
                                     <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded">${event.city}</span>
                                     <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded">${event.category}</span>
                                 </div>
                                 <div class="text-xs text-gray-400 mb-2">
-                                    📍 Coordinates: ${event.lat.toFixed(4)}, ${event.lon.toFixed(4)}
+                                    📍 ${event.lat.toFixed(4)}, ${event.lon.toFixed(4)}
                                 </div>
-                                <button onclick="showEventDetails(${event.id})" class="bg-blue-500 text-white text-xs px-3 py-1 rounded hover:bg-blue-600">
+                                <button onclick="showEventDetails(${event.id})" class="bg-blue-500 text-white text-xs px-3 py-1 rounded hover:bg-blue-600 w-full">
                                     View Details
                                 </button>
                             </div>
@@ -1050,7 +1096,7 @@
                 
                 // Add a simple map visualization
                 mapHTML += '<div class="mt-4 p-4 bg-blue-50 rounded-lg">';
-                mapHTML += '<h4 class="font-semibold text-blue-800 mb-2">📍 Event Locations</h4>';
+                mapHTML += '<h4 class="font-semibold text-blue-800 mb-2">🗺️ Location Summary</h4>';
                 mapHTML += '<div class="text-sm text-blue-700">';
                 
                 const cities = [...new Set(events.map(e => e.city))];
@@ -1060,16 +1106,20 @@
                 mapHTML += '<div class="mt-2 text-xs text-blue-600">';
                 mapHTML += `Total events: ${events.length} | Cities: ${cities.length}`;
                 mapHTML += '</div>';
+                mapHTML += '<div class="mt-2 text-xs text-blue-500">';
+                mapHTML += '💡 This is a fallback map view. Interactive map may not be available.';
+                mapHTML += '</div>';
                 mapHTML += '</div>';
                 
             } else {
-                mapHTML += '<p class="text-gray-500 text-center py-4">No events to display on map</p>';
+                mapHTML += '<p class="text-gray-500 text-center py-8">No events to display on map</p>';
             }
             
             mapHTML += '</div>';
             
             mapElement.innerHTML = mapHTML;
             console.log('✅ Fallback map created successfully');
+            console.log('Map element after update:', mapElement);
         }
     </script>
 </body>
