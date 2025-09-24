@@ -406,45 +406,159 @@
             if (loadingState) loadingState.classList.add('hidden');
             if (resultsContent) resultsContent.classList.remove('hidden');
             
-            // Create sample events
-            const sampleEvents = [
-                {
-                    title: `${city || country} Cultural Festival`,
-                    description: `Experience the rich culture and traditions of ${city || country} during ${season}.`,
-                    category: 'Art & Culture',
-                    city: city || 'Various Cities',
-                    rating: 4.5,
-                    ratingCount: 15,
-                    indoor_outdoor: 'outdoor',
-                    start_time: new Date().toISOString(),
-                    end_time: new Date(Date.now() + 86400000).toISOString()
-                },
-                {
-                    title: `${city || country} Food Tour`,
-                    description: `Discover local cuisine and culinary traditions in ${city || country}.`,
-                    category: 'Food & Drink',
-                    city: city || 'Various Cities',
-                    rating: 4.7,
-                    ratingCount: 23,
-                    indoor_outdoor: 'indoor',
-                    start_time: new Date().toISOString(),
-                    end_time: new Date(Date.now() + 7200000).toISOString()
-                },
-                {
-                    title: `${city || country} Historical Sites`,
-                    description: `Explore historical landmarks and heritage sites in ${city || country}.`,
-                    category: 'History & Heritage',
-                    city: city || 'Various Cities',
-                    rating: 4.3,
-                    ratingCount: 18,
-                    indoor_outdoor: 'outdoor',
-                    start_time: new Date().toISOString(),
-                    end_time: new Date(Date.now() + 10800000).toISOString()
-                }
-            ];
+            // Get comprehensive sample events with coordinates
+            const sampleEvents = getSampleEvents(country, city, season, duration);
             
             // Display results
             displayInlineResults(sampleEvents, city || 'All Cities', country, season);
+            
+            // Display map
+            displayMap(sampleEvents, city || country);
+        }
+        
+        function getSampleEvents(country, city, season, duration) {
+            // City coordinates for map
+            const cityCoordinates = {
+                'Paris': [48.8566, 2.3522],
+                'Tokyo': [35.6762, 139.6503],
+                'London': [51.5074, -0.1278],
+                'Rome': [41.9028, 12.4964],
+                'Madrid': [40.4168, -3.7038],
+                'Berlin': [52.5200, 13.4050],
+                'New York': [40.7128, -74.0060],
+                'Los Angeles': [34.0522, -118.2437],
+                'Toronto': [43.6532, -79.3832],
+                'Vancouver': [49.2827, -123.1207],
+                'Sydney': [-33.8688, 151.2093],
+                'Melbourne': [-37.8136, 144.9631],
+                'Mumbai': [19.0760, 72.8777],
+                'Delhi': [28.7041, 77.1025],
+                'Bangkok': [13.7563, 100.5018],
+                'São Paulo': [-23.5505, -46.6333],
+                'Rio de Janeiro': [-22.9068, -43.1729],
+                'Mexico City': [19.4326, -99.1332],
+                'Seoul': [37.5665, 126.9780],
+                'Singapore': [1.3521, 103.8198]
+            };
+            
+            const targetCity = city || getMainCityForCountry(country);
+            const baseCoords = cityCoordinates[targetCity] || [0, 0];
+            
+            const events = [
+                {
+                    id: 1,
+                    title: `${targetCity} Cultural Festival`,
+                    description: `Experience the rich culture and traditions of ${targetCity} during ${season}. This vibrant festival showcases local arts, music, and traditions.`,
+                    category: 'Art & Culture',
+                    city: targetCity,
+                    rating: 4.5,
+                    ratingCount: 15,
+                    indoor_outdoor: 'outdoor',
+                    lat: baseCoords[0] + (Math.random() - 0.5) * 0.01,
+                    lon: baseCoords[1] + (Math.random() - 0.5) * 0.01,
+                    start_time: new Date().toISOString(),
+                    end_time: new Date(Date.now() + 86400000).toISOString(),
+                    reviews: [
+                        { user_name: 'Sarah M.', rating: 5, review_text: 'Amazing cultural experience!', date: '2024-01-15' },
+                        { user_name: 'James K.', rating: 4, review_text: 'Great festival, very authentic.', date: '2024-01-10' }
+                    ]
+                },
+                {
+                    id: 2,
+                    title: `${targetCity} Food Tour`,
+                    description: `Discover local cuisine and culinary traditions in ${targetCity}. Taste authentic dishes and learn about local food culture.`,
+                    category: 'Food & Drink',
+                    city: targetCity,
+                    rating: 4.7,
+                    ratingCount: 23,
+                    indoor_outdoor: 'indoor',
+                    lat: baseCoords[0] + (Math.random() - 0.5) * 0.01,
+                    lon: baseCoords[1] + (Math.random() - 0.5) * 0.01,
+                    start_time: new Date().toISOString(),
+                    end_time: new Date(Date.now() + 7200000).toISOString(),
+                    reviews: [
+                        { user_name: 'Maria G.', rating: 5, review_text: 'Delicious food and great guide!', date: '2024-01-12' },
+                        { user_name: 'David W.', rating: 4, review_text: 'Excellent food tour experience.', date: '2024-01-08' }
+                    ]
+                },
+                {
+                    id: 3,
+                    title: `${targetCity} Historical Sites`,
+                    description: `Explore historical landmarks and heritage sites in ${targetCity}. Learn about the rich history and architecture.`,
+                    category: 'History & Heritage',
+                    city: targetCity,
+                    rating: 4.3,
+                    ratingCount: 18,
+                    indoor_outdoor: 'outdoor',
+                    lat: baseCoords[0] + (Math.random() - 0.5) * 0.01,
+                    lon: baseCoords[1] + (Math.random() - 0.5) * 0.01,
+                    start_time: new Date().toISOString(),
+                    end_time: new Date(Date.now() + 10800000).toISOString(),
+                    reviews: [
+                        { user_name: 'Emma L.', rating: 4, review_text: 'Fascinating historical tour.', date: '2024-01-14' },
+                        { user_name: 'Michael R.', rating: 5, review_text: 'Great way to learn about local history.', date: '2024-01-11' }
+                    ]
+                },
+                {
+                    id: 4,
+                    title: `${targetCity} Nature Walk`,
+                    description: `Enjoy beautiful natural scenery and outdoor activities in ${targetCity}. Perfect for ${season} weather.`,
+                    category: 'Nature & Parks',
+                    city: targetCity,
+                    rating: 4.6,
+                    ratingCount: 12,
+                    indoor_outdoor: 'outdoor',
+                    lat: baseCoords[0] + (Math.random() - 0.5) * 0.01,
+                    lon: baseCoords[1] + (Math.random() - 0.5) * 0.01,
+                    start_time: new Date().toISOString(),
+                    end_time: new Date(Date.now() + 14400000).toISOString(),
+                    reviews: [
+                        { user_name: 'Anna T.', rating: 5, review_text: 'Beautiful nature and peaceful walk.', date: '2024-01-13' },
+                        { user_name: 'Robert H.', rating: 4, review_text: 'Great outdoor activity.', date: '2024-01-09' }
+                    ]
+                },
+                {
+                    id: 5,
+                    title: `${targetCity} Shopping Experience`,
+                    description: `Discover local markets and shopping districts in ${targetCity}. Find unique souvenirs and local products.`,
+                    category: 'Shopping & Fashion',
+                    city: targetCity,
+                    rating: 4.2,
+                    ratingCount: 8,
+                    indoor_outdoor: 'indoor',
+                    lat: baseCoords[0] + (Math.random() - 0.5) * 0.01,
+                    lon: baseCoords[1] + (Math.random() - 0.5) * 0.01,
+                    start_time: new Date().toISOString(),
+                    end_time: new Date(Date.now() + 18000000).toISOString(),
+                    reviews: [
+                        { user_name: 'Lisa P.', rating: 4, review_text: 'Great shopping opportunities.', date: '2024-01-16' },
+                        { user_name: 'John D.', rating: 4, review_text: 'Found some unique items.', date: '2024-01-07' }
+                    ]
+                }
+            ];
+            
+            return events;
+        }
+        
+        function getMainCityForCountry(country) {
+            const mainCities = {
+                'France': 'Paris',
+                'Japan': 'Tokyo',
+                'United Kingdom': 'London',
+                'Italy': 'Rome',
+                'Spain': 'Madrid',
+                'Germany': 'Berlin',
+                'United States': 'New York',
+                'Canada': 'Toronto',
+                'Australia': 'Sydney',
+                'India': 'Mumbai',
+                'Thailand': 'Bangkok',
+                'Brazil': 'São Paulo',
+                'Mexico': 'Mexico City',
+                'South Korea': 'Seoul',
+                'Singapore': 'Singapore'
+            };
+            return mainCities[country] || 'City';
         }
         
         function displayInlineResults(events, city, country, season) {
@@ -493,9 +607,24 @@
                                     ${event.indoor_outdoor}
                                 </span>
                             </div>
+                            <div class="text-right">
+                                <div>${formatDateTime(event.start_time)}</div>
+                                <div>to ${formatDateTime(event.end_time)}</div>
+                            </div>
                         </div>
                         <div class="mt-2 text-xs text-gray-400">
-                            <span>${event.ratingCount} reviews</span>
+                            <div class="flex justify-between">
+                                <span>${event.ratingCount} reviews</span>
+                                <span>Event ID: ${event.id}</span>
+                            </div>
+                        </div>
+                        <div class="mt-3 flex space-x-2">
+                            <button onclick="showEventDetails(${event.id})" class="bg-blue-500 text-white text-xs px-3 py-1 rounded hover:bg-blue-600">
+                                View Details
+                            </button>
+                            <button onclick="showEventReviews(${event.id})" class="bg-green-500 text-white text-xs px-3 py-1 rounded hover:bg-green-600">
+                                Reviews (${event.reviews ? event.reviews.length : 0})
+                            </button>
                         </div>
                     </div>
                 `).join('');
@@ -514,6 +643,272 @@
                         <p class="text-sm text-gray-600">${events.filter(e => e.category === category).length} events in this category</p>
                     </div>
                 `).join('');
+            }
+        }
+        
+        // Global events storage
+        let currentEvents = [];
+        
+        // Format date and time for display
+        function formatDateTime(dateTimeString) {
+            const date = new Date(dateTimeString);
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        }
+        
+        // Show event details with rating functionality
+        function showEventDetails(eventId) {
+            const event = currentEvents.find(e => e.id === eventId);
+            if (!event) {
+                alert('Event not found');
+                return;
+            }
+            
+            // Create popup overlay
+            const popupOverlay = document.createElement('div');
+            popupOverlay.className = 'popup-overlay';
+            popupOverlay.onclick = () => popupOverlay.remove();
+            
+            // Create popup content
+            const popupContent = document.createElement('div');
+            popupContent.className = 'popup-content';
+            popupContent.onclick = (e) => e.stopPropagation();
+            
+            popupContent.innerHTML = `
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-semibold text-gray-800">${event.title}</h3>
+                    <button onclick="this.closest('.popup-overlay').remove()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+                </div>
+                
+                <div class="mb-4">
+                    <p class="text-gray-600 mb-2">${event.description}</p>
+                    <div class="flex items-center space-x-2 mb-2">
+                        <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">${event.category}</span>
+                        <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-sm">${event.city}</span>
+                    </div>
+                    <div class="text-sm text-gray-500">
+                        <div>Start: ${formatDateTime(event.start_time)}</div>
+                        <div>End: ${formatDateTime(event.end_time)}</div>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <h4 class="font-semibold mb-2">Rate this event:</h4>
+                    <div class="star-rating" id="ratingStars">
+                        <span class="star" data-rating="1">★</span>
+                        <span class="star" data-rating="2">★</span>
+                        <span class="star" data-rating="3">★</span>
+                        <span class="star" data-rating="4">★</span>
+                        <span class="star" data-rating="5">★</span>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <h4 class="font-semibold mb-2">Write a review:</h4>
+                    <textarea id="reviewText" class="w-full p-2 border border-gray-300 rounded-md" rows="3" placeholder="Share your experience..."></textarea>
+                    <input type="text" id="userName" class="w-full p-2 border border-gray-300 rounded-md mt-2" placeholder="Your name (optional)" value="Anonymous">
+                </div>
+                
+                <div class="flex space-x-2">
+                    <button onclick="submitRating(${eventId})" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                        Submit Rating & Review
+                    </button>
+                    <button onclick="showEventReviews(${eventId})" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                        View Reviews
+                    </button>
+                </div>
+            `;
+            
+            popupOverlay.appendChild(popupContent);
+            document.body.appendChild(popupOverlay);
+            
+            // Add star rating functionality
+            const stars = popupContent.querySelectorAll('.star');
+            let selectedRating = 0;
+            
+            stars.forEach((star, index) => {
+                star.addEventListener('click', () => {
+                    selectedRating = index + 1;
+                    stars.forEach((s, i) => {
+                        s.classList.toggle('active', i < selectedRating);
+                    });
+                });
+                
+                star.addEventListener('mouseenter', () => {
+                    stars.forEach((s, i) => {
+                        s.classList.toggle('active', i <= index);
+                    });
+                });
+            });
+            
+            popupContent.addEventListener('mouseleave', () => {
+                stars.forEach((s, i) => {
+                    s.classList.toggle('active', i < selectedRating);
+                });
+            });
+        }
+        
+        // Submit rating and review
+        function submitRating(eventId) {
+            const stars = document.querySelectorAll('.star');
+            const selectedRating = Array.from(stars).filter(s => s.classList.contains('active')).length;
+            const reviewText = document.getElementById('reviewText').value;
+            const userName = document.getElementById('userName').value || 'Anonymous';
+            
+            if (selectedRating === 0) {
+                alert('Please select a rating');
+                return;
+            }
+            
+            // Find the event and add the review
+            const event = currentEvents.find(e => e.id === eventId);
+            if (event) {
+                event.reviews.push({
+                    user_name: userName,
+                    rating: selectedRating,
+                    review_text: reviewText.trim(),
+                    date: new Date().toLocaleDateString()
+                });
+                
+                // Update rating
+                const totalRating = event.reviews.reduce((sum, review) => sum + review.rating, 0);
+                event.rating = totalRating / event.reviews.length;
+                event.ratingCount = event.reviews.length;
+            }
+            
+            alert('Thank you for your rating and review!');
+            
+            // Close popup
+            document.querySelector('.popup-overlay').remove();
+            
+            // Refresh the display
+            displayInlineResults(currentEvents, 'All Cities', 'Country', 'Season');
+        }
+        
+        // Show event reviews
+        function showEventReviews(eventId) {
+            const event = currentEvents.find(e => e.id === eventId);
+            if (!event) {
+                alert('Event not found');
+                return;
+            }
+            
+            // Create popup overlay
+            const popupOverlay = document.createElement('div');
+            popupOverlay.className = 'popup-overlay';
+            popupOverlay.onclick = () => popupOverlay.remove();
+            
+            // Create popup content
+            const popupContent = document.createElement('div');
+            popupContent.className = 'popup-content';
+            popupContent.onclick = (e) => e.stopPropagation();
+            
+            const reviews = event.reviews || [];
+            
+            popupContent.innerHTML = `
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-semibold text-gray-800">Reviews for ${event.title}</h3>
+                    <button onclick="this.closest('.popup-overlay').remove()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+                </div>
+                
+                <div class="mb-4">
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-yellow-500">${event.rating.toFixed(1)} ⭐</div>
+                        <div class="text-sm text-gray-500">Based on ${event.ratingCount} reviews</div>
+                    </div>
+                </div>
+                
+                <div class="space-y-3 max-h-96 overflow-y-auto">
+                    ${reviews.length === 0 ? 
+                        '<p class="text-gray-500 text-center py-4">No reviews yet. Be the first to review!</p>' :
+                        reviews.map(review => `
+                            <div class="review-card bg-gray-50 p-3 rounded-lg">
+                                <div class="flex justify-between items-start mb-2">
+                                    <div class="font-semibold text-sm">${review.user_name}</div>
+                                    <div class="text-yellow-500 text-sm">${'★'.repeat(review.rating)}${'☆'.repeat(5-review.rating)}</div>
+                                </div>
+                                <p class="text-sm text-gray-600 mb-1">${review.review_text}</p>
+                                <div class="text-xs text-gray-400">${review.date}</div>
+                            </div>
+                        `).join('')
+                    }
+                </div>
+            `;
+            
+            popupOverlay.appendChild(popupContent);
+            document.body.appendChild(popupOverlay);
+        }
+        
+        // Display map with event markers
+        function displayMap(events, destination) {
+            // Store events globally for other functions
+            currentEvents = events;
+            
+            // Clear existing map
+            const mapElement = document.getElementById('map');
+            if (!mapElement) return;
+            
+            // Initialize map
+            if (typeof L !== 'undefined') {
+                // Clear existing map
+                if (window.map) {
+                    window.map.remove();
+                }
+                
+                // Initialize map with a default center
+                let mapCenter = [0, 0];
+                let mapZoom = 2;
+                
+                // If we have events, use their coordinates to center the map
+                if (events && events.length > 0) {
+                    const group = new L.featureGroup();
+                    events.forEach(event => {
+                        if (event.lat && event.lon) {
+                            const marker = L.marker([event.lat, event.lon])
+                                .bindPopup(`
+                                    <div class="p-2">
+                                        <h4 class="font-semibold">${event.title}</h4>
+                                        <p class="text-sm text-gray-600">${event.category}</p>
+                                        <p class="text-xs text-gray-500">${event.city}</p>
+                                        <p class="text-xs text-gray-500">${formatDateTime(event.start_time)}</p>
+                                        <div class="mt-1">
+                                            <span class="rating-badge text-white text-xs px-2 py-1 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500">
+                                                ${event.rating.toFixed(1)} ⭐
+                                            </span>
+                                        </div>
+                                        <div class="mt-1">
+                                            <button onclick="showEventDetails(${event.id})" class="bg-blue-500 text-white text-xs px-2 py-1 rounded hover:bg-blue-600">
+                                                View Details
+                                            </button>
+                                        </div>
+                                    </div>
+                                `);
+                            group.addLayer(marker);
+                        }
+                    });
+                    
+                    // Create map and add tiles
+                    window.map = L.map('map');
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© OpenStreetMap contributors'
+                    }).addTo(window.map);
+                    
+                    // Add markers to map
+                    group.eachLayer(marker => marker.addTo(window.map));
+                    
+                    // Fit map to show all markers
+                    if (group.getLayers().length > 0) {
+                        window.map.fitBounds(group.getBounds().pad(0.1));
+                    }
+                } else {
+                    // No events, show world map
+                    window.map = L.map('map').setView(mapCenter, mapZoom);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© OpenStreetMap contributors'
+                    }).addTo(window.map);
+                }
+            } else {
+                // Leaflet not loaded, show message
+                mapElement.innerHTML = '<div class="text-center py-8 text-gray-500">Map not available - Leaflet library not loaded</div>';
             }
         }
     </script>
