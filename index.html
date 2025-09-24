@@ -940,234 +940,237 @@
             
             console.log('✅ Map element found, dimensions:', mapElement.offsetWidth, 'x', mapElement.offsetHeight);
             
-            // Ensure map element is visible and has proper dimensions
-            mapElement.style.minHeight = '400px';
-            mapElement.style.width = '100%';
-            mapElement.style.display = 'block';
+            // Always create the visual map first - this will definitely work
+            createVisualMap(events, mapElement);
             
-            // Wait a bit for DOM to be ready, then try to create map
+            // Then try to enhance with Leaflet if available
             setTimeout(() => {
                 try {
-                    // Check if Leaflet is loaded
                     if (typeof L !== 'undefined' && L.map && L.marker && L.tileLayer) {
-                        console.log('✅ Leaflet library fully loaded, trying Leaflet map');
-                        createLeafletMap(events, mapElement);
+                        console.log('✅ Leaflet library available, enhancing with interactive map');
+                        enhanceWithLeafletMap(events, mapElement);
                     } else {
-                        console.log('❌ Leaflet library not fully loaded, trying fallback');
-                        console.log('L available:', typeof L !== 'undefined');
-                        console.log('L.map available:', typeof L !== 'undefined' && L.map);
-                        console.log('L.marker available:', typeof L !== 'undefined' && L.marker);
-                        console.log('L.tileLayer available:', typeof L !== 'undefined' && L.tileLayer);
-                        createFallbackMap(events, mapElement);
+                        console.log('ℹ️ Leaflet not available, using visual map only');
                     }
                 } catch (error) {
-                    console.error('❌ Error creating map:', error);
-                    createFallbackMap(events, mapElement);
+                    console.error('❌ Error enhancing with Leaflet:', error);
                 }
-            }, 200);
+            }, 500);
             
             console.log('=== MAP DEBUG END ===');
         }
         
-        function createLeafletMap(events, mapElement) {
-            console.log('Creating Leaflet map...');
-            console.log('Map element:', mapElement);
-            console.log('Map element dimensions:', mapElement.offsetWidth, 'x', mapElement.offsetHeight);
+        function createVisualMap(events, mapElement) {
+            console.log('Creating visual map with', events.length, 'events');
             
-            // Clear existing map
-            if (window.map) {
-                console.log('Removing existing map');
-                window.map.remove();
-                window.map = null;
-            }
-            
-            // Clear the map element content
-            mapElement.innerHTML = '';
-            
-            // Initialize map with a default center
-            let mapCenter = [0, 0];
-            let mapZoom = 2;
-            
-            try {
-                // If we have events, use their coordinates to center the map
-                if (events && events.length > 0) {
-                    console.log('Creating Leaflet map with', events.length, 'events');
-                    
-                    const group = new L.featureGroup();
-                    let validMarkers = 0;
-                    
-                    events.forEach((event, index) => {
-                        console.log(`Event ${index + 1}:`, event.title, 'Coordinates:', event.lat, event.lon);
-                        
-                        if (event.lat && event.lon && event.lat !== 0 && event.lon !== 0) {
-                            console.log('✅ Adding marker for:', event.title, 'at', event.lat, event.lon);
-                            
-                            const marker = L.marker([event.lat, event.lon])
-                                .bindPopup(`
-                                    <div class="p-2">
-                                        <h4 class="font-semibold">${event.title}</h4>
-                                        <p class="text-sm text-gray-600">${event.category}</p>
-                                        <p class="text-xs text-gray-500">${event.city}</p>
-                                        <p class="text-xs text-gray-500">${formatDateTime(event.start_time)}</p>
-                                        <div class="mt-1">
-                                            <span class="rating-badge text-white text-xs px-2 py-1 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500">
-                                                ${event.rating.toFixed(1)} ⭐
-                                            </span>
-                                        </div>
-                                        <div class="mt-1">
-                                            <button onclick="showEventDetails(${event.id})" class="bg-blue-500 text-white text-xs px-2 py-1 rounded hover:bg-blue-600">
-                                                View Details
-                                            </button>
-                                        </div>
-                                    </div>
-                                `);
-                            group.addLayer(marker);
-                            validMarkers++;
-                        } else {
-                            console.log('❌ Skipping event with invalid coordinates:', event.title, 'lat:', event.lat, 'lon:', event.lon);
-                        }
-                    });
-                    
-                    console.log('Valid markers created:', validMarkers);
-                    
-                    if (validMarkers > 0) {
-                        console.log('Creating Leaflet map with markers...');
-                        
-                        // Create map
-                        window.map = L.map('map', {
-                            preferCanvas: true,
-                            zoomControl: true
-                        });
-                        
-                        // Add tiles
-                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                            attribution: '© OpenStreetMap contributors',
-                            maxZoom: 19
-                        }).addTo(window.map);
-                        
-                        console.log('Leaflet map created, adding markers...');
-                        
-                        // Add markers to map
-                        group.eachLayer(marker => marker.addTo(window.map));
-                        
-                        console.log('Markers added, fitting bounds...');
-                        
-                        // Fit map to show all markers
-                        const bounds = group.getBounds();
-                        console.log('Map bounds:', bounds);
-                        window.map.fitBounds(bounds.pad(0.1));
-                        
-                        console.log('✅ Leaflet map created successfully with', validMarkers, 'markers');
-                    } else {
-                        console.log('❌ No valid markers, showing default Leaflet map');
-                        // No valid markers, show world map
-                        window.map = L.map('map', {
-                            preferCanvas: true,
-                            zoomControl: true
-                        }).setView(mapCenter, mapZoom);
-                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                            attribution: '© OpenStreetMap contributors',
-                            maxZoom: 19
-                        }).addTo(window.map);
-                    }
-                } else {
-                    console.log('❌ No events, showing default Leaflet map');
-                    // No events, show world map
-                    window.map = L.map('map', {
-                        preferCanvas: true,
-                        zoomControl: true
-                    }).setView(mapCenter, mapZoom);
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        attribution: '© OpenStreetMap contributors',
-                        maxZoom: 19
-                    }).addTo(window.map);
-                }
-                
-                // Force map to invalidate size after creation
-                setTimeout(() => {
-                    if (window.map) {
-                        window.map.invalidateSize();
-                        console.log('Map size invalidated');
-                    }
-                }, 200);
-                
-            } catch (error) {
-                console.error('❌ Error creating Leaflet map:', error);
-                throw error; // Re-throw to trigger fallback
-            }
-        }
-        
-        function createFallbackMap(events, mapElement) {
-            console.log('Creating fallback map with', events.length, 'events');
-            console.log('Map element:', mapElement);
-            console.log('Map element dimensions:', mapElement.offsetWidth, 'x', mapElement.offsetHeight);
-            
-            // Ensure map element is visible
-            mapElement.style.minHeight = '400px';
-            mapElement.style.backgroundColor = '#f3f4f6';
-            mapElement.style.border = '2px solid #e5e7eb';
-            mapElement.style.borderRadius = '8px';
-            
-            // Create a simple HTML-based map representation
-            let mapHTML = '<div class="bg-gray-100 rounded-lg p-4 h-full">';
-            mapHTML += '<h3 class="text-lg font-semibold mb-4 text-gray-800">📍 Event Locations Map</h3>';
+            // Ensure map element is visible and has proper dimensions
+            mapElement.style.minHeight = '500px';
+            mapElement.style.width = '100%';
+            mapElement.style.display = 'block';
+            mapElement.style.backgroundColor = '#f8fafc';
+            mapElement.style.border = '2px solid #e2e8f0';
+            mapElement.style.borderRadius = '12px';
+            mapElement.style.padding = '20px';
+            mapElement.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
             
             if (events && events.length > 0) {
-                mapHTML += '<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">';
-                
+                // Group events by city
+                const eventsByCity = {};
                 events.forEach(event => {
-                    if (event.lat && event.lon && event.lat !== 0 && event.lon !== 0) {
+                    if (!eventsByCity[event.city]) {
+                        eventsByCity[event.city] = [];
+                    }
+                    eventsByCity[event.city].push(event);
+                });
+                
+                const cities = Object.keys(eventsByCity);
+                console.log('Events grouped by cities:', cities);
+                
+                let mapHTML = `
+                    <div class="w-full">
+                        <div class="text-center mb-6">
+                            <h3 class="text-2xl font-bold text-gray-800 mb-2">🗺️ Event Locations Map</h3>
+                            <p class="text-gray-600">Showing ${events.length} events across ${cities.length} cities</p>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                `;
+                
+                // Create a city section for each city
+                cities.forEach(city => {
+                    const cityEvents = eventsByCity[city];
+                    const avgRating = (cityEvents.reduce((sum, event) => sum + event.rating, 0) / cityEvents.length).toFixed(1);
+                    
+                    mapHTML += `
+                        <div class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm hover:shadow-md transition-shadow">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="text-lg font-semibold text-gray-800">📍 ${city}</h4>
+                                <div class="flex items-center space-x-2">
+                                    <span class="bg-blue-100 text-blue-800 text-sm px-2 py-1 rounded-full">${cityEvents.length} events</span>
+                                    <span class="bg-yellow-100 text-yellow-800 text-sm px-2 py-1 rounded-full">${avgRating} ⭐ avg</span>
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-3">
+                    `;
+                    
+                    cityEvents.forEach(event => {
                         mapHTML += `
-                            <div class="bg-white p-3 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                            <div class="bg-gray-50 rounded-lg p-3 border border-gray-100">
                                 <div class="flex justify-between items-start mb-2">
-                                    <h4 class="font-semibold text-gray-800 text-sm">${event.title}</h4>
-                                    <span class="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">${event.rating.toFixed(1)} ⭐</span>
+                                    <h5 class="font-medium text-gray-800 text-sm">${event.title}</h5>
+                                    <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">${event.rating.toFixed(1)} ⭐</span>
                                 </div>
                                 <p class="text-xs text-gray-600 mb-2 line-clamp-2">${event.description}</p>
                                 <div class="flex items-center justify-between text-xs text-gray-500 mb-2">
-                                    <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded">${event.city}</span>
-                                    <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded">${event.category}</span>
+                                    <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded">${event.category}</span>
+                                    <span class="text-gray-400">${event.indoor_outdoor === 'indoor' ? '🏠' : '🌳'} ${event.indoor_outdoor}</span>
                                 </div>
                                 <div class="text-xs text-gray-400 mb-2">
-                                    📍 ${event.lat.toFixed(4)}, ${event.lon.toFixed(4)}
+                                    📍 Coordinates: ${event.lat.toFixed(4)}, ${event.lon.toFixed(4)}
                                 </div>
-                                <button onclick="showEventDetails(${event.id})" class="bg-blue-500 text-white text-xs px-3 py-1 rounded hover:bg-blue-600 w-full">
-                                    View Details
-                                </button>
+                                <div class="flex space-x-2">
+                                    <button onclick="showEventDetails(${event.id})" class="bg-blue-500 text-white text-xs px-3 py-1 rounded hover:bg-blue-600 flex-1">
+                                        View Details
+                                    </button>
+                                    <button onclick="showEventReviews(${event.id})" class="bg-green-500 text-white text-xs px-3 py-1 rounded hover:bg-green-600 flex-1">
+                                        Reviews (${event.reviews ? event.reviews.length : 0})
+                                    </button>
+                                </div>
                             </div>
                         `;
+                    });
+                    
+                    mapHTML += `
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                mapHTML += `
+                        </div>
+                        
+                        <div class="mt-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4">
+                            <h4 class="font-semibold text-gray-800 mb-2">📊 Location Summary</h4>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-blue-600">${events.length}</div>
+                                    <div class="text-gray-600">Total Events</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-green-600">${cities.length}</div>
+                                    <div class="text-gray-600">Cities</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-purple-600">${(events.reduce((sum, event) => sum + event.rating, 0) / events.length).toFixed(1)}</div>
+                                    <div class="text-gray-600">Avg Rating</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-orange-600">${[...new Set(events.map(e => e.category))].length}</div>
+                                    <div class="text-gray-600">Categories</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                mapElement.innerHTML = mapHTML;
+                console.log('✅ Visual map created successfully');
+            } else {
+                mapElement.innerHTML = `
+                    <div class="text-center py-12">
+                        <div class="text-6xl mb-4">🗺️</div>
+                        <h3 class="text-xl font-semibold text-gray-800 mb-2">No Events to Display</h3>
+                        <p class="text-gray-600">No events found for the selected criteria.</p>
+                    </div>
+                `;
+            }
+        }
+        
+        function enhanceWithLeafletMap(events, mapElement) {
+            console.log('Enhancing with Leaflet map...');
+            
+            // Clear existing Leaflet map
+            if (window.leafletMap) {
+                window.leafletMap.remove();
+                window.leafletMap = null;
+            }
+            
+            // Create a new container for the Leaflet map
+            const leafletContainer = document.createElement('div');
+            leafletContainer.id = 'leaflet-map-container';
+            leafletContainer.style.height = '400px';
+            leafletContainer.style.width = '100%';
+            leafletContainer.style.marginTop = '20px';
+            leafletContainer.style.borderRadius = '8px';
+            leafletContainer.style.overflow = 'hidden';
+            
+            // Add the container to the map element
+            mapElement.appendChild(leafletContainer);
+            
+            try {
+                // Create Leaflet map
+                window.leafletMap = L.map('leaflet-map-container', {
+                    preferCanvas: true,
+                    zoomControl: true
+                });
+                
+                // Add tiles
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors',
+                    maxZoom: 19
+                }).addTo(window.leafletMap);
+                
+                // Add markers
+                const group = new L.featureGroup();
+                let validMarkers = 0;
+                
+                events.forEach(event => {
+                    if (event.lat && event.lon && event.lat !== 0 && event.lon !== 0) {
+                        const marker = L.marker([event.lat, event.lon])
+                            .bindPopup(`
+                                <div class="p-2">
+                                    <h4 class="font-semibold">${event.title}</h4>
+                                    <p class="text-sm text-gray-600">${event.category}</p>
+                                    <p class="text-xs text-gray-500">${event.city}</p>
+                                    <div class="mt-1">
+                                        <span class="rating-badge text-white text-xs px-2 py-1 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500">
+                                            ${event.rating.toFixed(1)} ⭐
+                                        </span>
+                                    </div>
+                                </div>
+                            `);
+                        group.addLayer(marker);
+                        validMarkers++;
                     }
                 });
                 
-                mapHTML += '</div>';
+                if (validMarkers > 0) {
+                    group.eachLayer(marker => marker.addTo(window.leafletMap));
+                    const bounds = group.getBounds();
+                    window.leafletMap.fitBounds(bounds.pad(0.1));
+                    console.log('✅ Leaflet map enhanced successfully with', validMarkers, 'markers');
+                } else {
+                    window.leafletMap.setView([0, 0], 2);
+                    console.log('✅ Leaflet map created with default view');
+                }
                 
-                // Add a simple map visualization
-                mapHTML += '<div class="mt-4 p-4 bg-blue-50 rounded-lg">';
-                mapHTML += '<h4 class="font-semibold text-blue-800 mb-2">🗺️ Location Summary</h4>';
-                mapHTML += '<div class="text-sm text-blue-700">';
+                // Force map to invalidate size
+                setTimeout(() => {
+                    if (window.leafletMap) {
+                        window.leafletMap.invalidateSize();
+                    }
+                }, 100);
                 
-                const cities = [...new Set(events.map(e => e.city))];
-                mapHTML += `Events in: ${cities.join(', ')}`;
-                
-                mapHTML += '</div>';
-                mapHTML += '<div class="mt-2 text-xs text-blue-600">';
-                mapHTML += `Total events: ${events.length} | Cities: ${cities.length}`;
-                mapHTML += '</div>';
-                mapHTML += '<div class="mt-2 text-xs text-blue-500">';
-                mapHTML += '💡 This is a fallback map view. Interactive map may not be available.';
-                mapHTML += '</div>';
-                mapHTML += '</div>';
-                
-            } else {
-                mapHTML += '<p class="text-gray-500 text-center py-8">No events to display on map</p>';
+            } catch (error) {
+                console.error('❌ Error enhancing with Leaflet:', error);
+                // Remove the container if Leaflet fails
+                if (leafletContainer.parentNode) {
+                    leafletContainer.parentNode.removeChild(leafletContainer);
+                }
             }
-            
-            mapHTML += '</div>';
-            
-            mapElement.innerHTML = mapHTML;
-            console.log('✅ Fallback map created successfully');
-            console.log('Map element after update:', mapElement);
         }
+        
     </script>
 </body>
 </html>
