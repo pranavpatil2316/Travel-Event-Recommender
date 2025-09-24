@@ -902,15 +902,25 @@
             
             console.log('✅ Map element found, dimensions:', mapElement.offsetWidth, 'x', mapElement.offsetHeight);
             
-            // Check Leaflet library
-            if (typeof L === 'undefined') {
-                console.error('❌ Leaflet library not loaded');
-                mapElement.innerHTML = '<div class="text-center py-8 text-gray-500">Map not available - Leaflet library not loaded</div>';
-                return;
+            // Try multiple approaches to create the map
+            try {
+                // Approach 1: Try Leaflet
+                if (typeof L !== 'undefined') {
+                    console.log('✅ Leaflet library loaded, trying Leaflet map');
+                    createLeafletMap(events, mapElement);
+                } else {
+                    console.log('❌ Leaflet library not loaded, trying fallback');
+                    createFallbackMap(events, mapElement);
+                }
+            } catch (error) {
+                console.error('❌ Error creating map:', error);
+                createFallbackMap(events, mapElement);
             }
             
-            console.log('✅ Leaflet library loaded');
-            
+            console.log('=== MAP DEBUG END ===');
+        }
+        
+        function createLeafletMap(events, mapElement) {
             // Clear existing map
             if (window.map) {
                 console.log('Removing existing map');
@@ -923,7 +933,7 @@
             
             // If we have events, use their coordinates to center the map
             if (events && events.length > 0) {
-                console.log('Creating map with', events.length, 'events');
+                console.log('Creating Leaflet map with', events.length, 'events');
                 
                 const group = new L.featureGroup();
                 let validMarkers = 0;
@@ -963,7 +973,7 @@
                 console.log('Valid markers created:', validMarkers);
                 
                 if (validMarkers > 0) {
-                    console.log('Creating map with markers...');
+                    console.log('Creating Leaflet map with markers...');
                     
                     // Create map and add tiles
                     window.map = L.map('map');
@@ -971,7 +981,7 @@
                         attribution: '© OpenStreetMap contributors'
                     }).addTo(window.map);
                     
-                    console.log('Map created, adding markers...');
+                    console.log('Leaflet map created, adding markers...');
                     
                     // Add markers to map
                     group.eachLayer(marker => marker.addTo(window.map));
@@ -983,9 +993,9 @@
                     console.log('Map bounds:', bounds);
                     window.map.fitBounds(bounds.pad(0.1));
                     
-                    console.log('✅ Map created successfully with', validMarkers, 'markers');
+                    console.log('✅ Leaflet map created successfully with', validMarkers, 'markers');
                 } else {
-                    console.log('❌ No valid markers, showing default map');
+                    console.log('❌ No valid markers, showing default Leaflet map');
                     // No valid markers, show world map
                     window.map = L.map('map').setView(mapCenter, mapZoom);
                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -993,15 +1003,73 @@
                     }).addTo(window.map);
                 }
             } else {
-                console.log('❌ No events, showing default map');
+                console.log('❌ No events, showing default Leaflet map');
                 // No events, show world map
                 window.map = L.map('map').setView(mapCenter, mapZoom);
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     attribution: '© OpenStreetMap contributors'
                 }).addTo(window.map);
             }
+        }
+        
+        function createFallbackMap(events, mapElement) {
+            console.log('Creating fallback map with', events.length, 'events');
             
-            console.log('=== MAP DEBUG END ===');
+            // Create a simple HTML-based map representation
+            let mapHTML = '<div class="bg-gray-100 rounded-lg p-4">';
+            mapHTML += '<h3 class="text-lg font-semibold mb-4 text-gray-800">Event Locations</h3>';
+            
+            if (events && events.length > 0) {
+                mapHTML += '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">';
+                
+                events.forEach(event => {
+                    if (event.lat && event.lon && event.lat !== 0 && event.lon !== 0) {
+                        mapHTML += `
+                            <div class="bg-white p-3 rounded-lg border border-gray-200">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h4 class="font-semibold text-gray-800">${event.title}</h4>
+                                    <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">${event.rating.toFixed(1)} ⭐</span>
+                                </div>
+                                <p class="text-sm text-gray-600 mb-2">${event.description}</p>
+                                <div class="flex items-center justify-between text-xs text-gray-500 mb-2">
+                                    <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded">${event.city}</span>
+                                    <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded">${event.category}</span>
+                                </div>
+                                <div class="text-xs text-gray-400 mb-2">
+                                    📍 Coordinates: ${event.lat.toFixed(4)}, ${event.lon.toFixed(4)}
+                                </div>
+                                <button onclick="showEventDetails(${event.id})" class="bg-blue-500 text-white text-xs px-3 py-1 rounded hover:bg-blue-600">
+                                    View Details
+                                </button>
+                            </div>
+                        `;
+                    }
+                });
+                
+                mapHTML += '</div>';
+                
+                // Add a simple map visualization
+                mapHTML += '<div class="mt-4 p-4 bg-blue-50 rounded-lg">';
+                mapHTML += '<h4 class="font-semibold text-blue-800 mb-2">📍 Event Locations</h4>';
+                mapHTML += '<div class="text-sm text-blue-700">';
+                
+                const cities = [...new Set(events.map(e => e.city))];
+                mapHTML += `Events in: ${cities.join(', ')}`;
+                
+                mapHTML += '</div>';
+                mapHTML += '<div class="mt-2 text-xs text-blue-600">';
+                mapHTML += `Total events: ${events.length} | Cities: ${cities.length}`;
+                mapHTML += '</div>';
+                mapHTML += '</div>';
+                
+            } else {
+                mapHTML += '<p class="text-gray-500 text-center py-4">No events to display on map</p>';
+            }
+            
+            mapHTML += '</div>';
+            
+            mapElement.innerHTML = mapHTML;
+            console.log('✅ Fallback map created successfully');
         }
     </script>
 </body>
