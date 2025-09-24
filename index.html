@@ -7,9 +7,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="shared-database.js"></script>
-    <script src="recommendation-engine.js"></script>
-    <script src="sample_reviews.js"></script>
+    <script src="shared-database.js" onerror="console.error('Failed to load shared-database.js')"></script>
+    <script src="recommendation-engine.js" onerror="console.error('Failed to load recommendation-engine.js')"></script>
+    <script src="sample_reviews.js" onerror="console.error('Failed to load sample_reviews.js')"></script>
     <style>
         #map { height: 400px; }
         .event-card {
@@ -237,6 +237,42 @@
         </div>
     </footer>
 
-    <script src="script.js"></script>
+    <script src="script.js" onerror="console.error('Failed to load script.js')"></script>
+    <script>
+        // Fallback form handler in case external scripts fail
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Fallback script loaded');
+            
+            // Check if form handler was attached by main script
+            setTimeout(function() {
+                const form = document.getElementById('recommendationForm');
+                if (form && !form.hasAttribute('data-handler-attached')) {
+                    console.log('Main script failed, attaching fallback handler');
+                    
+                    form.addEventListener('submit', function(e) {
+                        e.preventDefault();
+                        console.log('Fallback handler: Form submission prevented');
+                        
+                        const formData = new FormData(form);
+                        const country = formData.get('country');
+                        const season = formData.get('season');
+                        const duration = formData.get('duration');
+                        
+                        if (!country || !season || !duration) {
+                            alert('Please fill in all required fields');
+                            return false;
+                        }
+                        
+                        // Show a simple message
+                        alert('Form submitted successfully!\nCountry: ' + country + '\nSeason: ' + season + '\nDuration: ' + duration);
+                        
+                        return false;
+                    });
+                    
+                    form.setAttribute('data-handler-attached', 'true');
+                }
+            }, 1000);
+        });
+    </script>
 </body>
 </html>

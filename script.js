@@ -57,36 +57,50 @@ const countryCities = {
 document.addEventListener('DOMContentLoaded', async function() {
     console.log('DOM loaded, initializing application...');
     
-    // Initialize form first to ensure it works
-    initializeForm();
-    loadEventsData();
-    
-    // Initialize shared database in background
     try {
-        if (typeof initSharedDatabase === 'function') {
-            await initSharedDatabase();
-            console.log('Shared database initialized');
-        }
+        // Initialize form first to ensure it works
+        initializeForm();
+        console.log('Form initialized successfully');
         
-        if (typeof getCurrentUser === 'function') {
-            currentUser = await getCurrentUser();
-            console.log('Current user:', currentUser);
-        }
+        // Load events data
+        await loadEventsData();
+        console.log('Events data loaded');
+        
+        // Initialize shared database in background
+        try {
+            if (typeof initSharedDatabase === 'function') {
+                await initSharedDatabase();
+                console.log('Shared database initialized');
+            }
+            
+            if (typeof getCurrentUser === 'function') {
+                currentUser = await getCurrentUser();
+                console.log('Current user:', currentUser);
+            }
 
-        // Initialize recommendation engine
-        if (typeof RecommendationEngine !== 'undefined') {
-            recommendationEngine = new RecommendationEngine();
-            await recommendationEngine.initializeUserPreferences(currentUser.id);
-            console.log('Recommendation engine initialized');
+            // Initialize recommendation engine
+            if (typeof RecommendationEngine !== 'undefined') {
+                recommendationEngine = new RecommendationEngine();
+                if (currentUser && currentUser.id) {
+                    await recommendationEngine.initializeUserPreferences(currentUser.id);
+                }
+                console.log('Recommendation engine initialized');
+            }
+        } catch (error) {
+            console.error('Error initializing shared database:', error);
+            // Continue without database - form will still work
         }
     } catch (error) {
-        console.error('Error initializing shared database:', error);
-        // Continue without database - form will still work
+        console.error('Error during application initialization:', error);
+        // Show error message to user
+        alert('Error initializing application. Please refresh the page.');
     }
 });
 
 // Initialize form functionality
 function initializeForm() {
+    console.log('Initializing form...');
+    
     const form = document.getElementById('recommendationForm');
     const countrySelect = document.getElementById('country');
     const citySelect = document.getElementById('city');
@@ -94,48 +108,70 @@ function initializeForm() {
     
     if (!form) {
         console.error('Form element not found!');
+        alert('Form not found. Please refresh the page.');
         return;
     }
 
+    console.log('Form element found:', form);
+
     // Handle country selection
-    countrySelect.addEventListener('change', function() {
-        const selectedCountry = this.value;
-        const citySelect = document.getElementById('city');
-        
-        if (selectedCountry) {
-            // Show loading state
-            cityLoading.classList.remove('hidden');
-            citySelect.disabled = true;
-            citySelect.innerHTML = '<option value="">Loading cities...</option>';
+    if (countrySelect) {
+        countrySelect.addEventListener('change', function() {
+            const selectedCountry = this.value;
             
-            // Simulate API call delay for better UX
-            setTimeout(() => {
-                loadCitiesForCountry(selectedCountry);
-            }, 500);
-        } else {
-            citySelect.disabled = true;
-            citySelect.innerHTML = '<option value="">Select a country first...</option>';
-            cityLoading.classList.add('hidden');
-        }
-    });
+            if (selectedCountry) {
+                // Show loading state
+                if (cityLoading) cityLoading.classList.remove('hidden');
+                if (citySelect) {
+                    citySelect.disabled = true;
+                    citySelect.innerHTML = '<option value="">Loading cities...</option>';
+                }
+                
+                // Simulate API call delay for better UX
+                setTimeout(() => {
+                    loadCitiesForCountry(selectedCountry);
+                }, 500);
+            } else {
+                if (citySelect) {
+                    citySelect.disabled = true;
+                    citySelect.innerHTML = '<option value="">Select a country first...</option>';
+                }
+                if (cityLoading) cityLoading.classList.add('hidden');
+            }
+        });
+    }
 
     // Handle form submission
     form.addEventListener('submit', function(e) {
+        console.log('Form submit event triggered');
         e.preventDefault();
-        console.log('Form submitted - preventDefault() worked!');
-        handleFormSubmission();
+        console.log('Default prevented, calling handleFormSubmission');
+        
+        try {
+            handleFormSubmission();
+        } catch (error) {
+            console.error('Error in form submission:', error);
+            alert('Error processing form. Please try again.');
+        }
+        
         return false;
     });
+    
+    // Mark form as having handler attached
+    form.setAttribute('data-handler-attached', 'true');
 
     // Set default season based on current month
-    const currentMonth = new Date().getMonth() + 1;
-    let defaultSeason = 'spring';
-    if (currentMonth >= 3 && currentMonth <= 5) defaultSeason = 'spring';
-    else if (currentMonth >= 6 && currentMonth <= 8) defaultSeason = 'summer';
-    else if (currentMonth >= 9 && currentMonth <= 11) defaultSeason = 'autumn';
-    else defaultSeason = 'winter';
-    
-    document.getElementById('season').value = defaultSeason;
+    const seasonSelect = document.getElementById('season');
+    if (seasonSelect) {
+        const currentMonth = new Date().getMonth() + 1;
+        let defaultSeason = 'spring';
+        if (currentMonth >= 3 && currentMonth <= 5) defaultSeason = 'spring';
+        else if (currentMonth >= 6 && currentMonth <= 8) defaultSeason = 'summer';
+        else if (currentMonth >= 9 && currentMonth <= 11) defaultSeason = 'autumn';
+        else defaultSeason = 'winter';
+        
+        seasonSelect.value = defaultSeason;
+    }
 
     // Add upcoming events filter
     const upcomingDaysSelect = document.getElementById('upcomingDays');
@@ -144,6 +180,8 @@ function initializeForm() {
             loadUpcomingEvents();
         });
     }
+    
+    console.log('Form initialization completed');
 }
 
 // Load cities for selected country using API
