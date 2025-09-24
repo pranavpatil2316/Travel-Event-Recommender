@@ -7,9 +7,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="shared-database.js" onerror="console.error('Failed to load shared-database.js')"></script>
-    <script src="recommendation-engine.js" onerror="console.error('Failed to load recommendation-engine.js')"></script>
-    <script src="sample_reviews.js" onerror="console.error('Failed to load sample_reviews.js')"></script>
+    <script src="shared-database.js" onerror="console.error('Failed to load shared-database.js')" onload="scriptsLoaded.sharedDatabase = true; console.log('shared-database.js loaded successfully')"></script>
+    <script src="recommendation-engine.js" onerror="console.error('Failed to load recommendation-engine.js')" onload="scriptsLoaded.recommendationEngine = true; console.log('recommendation-engine.js loaded successfully')"></script>
+    <script src="sample_reviews.js" onerror="console.error('Failed to load sample_reviews.js')" onload="scriptsLoaded.sampleReviews = true; console.log('sample_reviews.js loaded successfully')"></script>
     <style>
         #map { height: 400px; }
         .event-card {
@@ -237,8 +237,24 @@
         </div>
     </footer>
 
-    <script src="script.js" onerror="console.error('Failed to load script.js')"></script>
+    <script src="script.js" onerror="console.error('Failed to load script.js')" onload="scriptsLoaded.mainScript = true; console.log('script.js loaded successfully')"></script>
     <script>
+        // Track script loading status
+        let scriptsLoaded = {
+            sharedDatabase: false,
+            recommendationEngine: false,
+            sampleReviews: false,
+            mainScript: false
+        };
+        
+        // Check if all required scripts are loaded
+        function checkScriptsLoaded() {
+            return scriptsLoaded.sharedDatabase && 
+                   scriptsLoaded.recommendationEngine && 
+                   scriptsLoaded.sampleReviews && 
+                   scriptsLoaded.mainScript;
+        }
+        
         // Inline fallback with full functionality
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Inline script loaded');
@@ -251,8 +267,22 @@
                     
                     // Initialize form with inline functionality
                     initializeInlineForm();
+                } else if (form && form.hasAttribute('data-handler-attached')) {
+                    console.log('Main script loaded successfully - full functionality available');
                 }
-            }, 1000);
+            }, 2000); // Increased timeout to give more time for scripts to load
+        });
+        
+        // Listen for script load events
+        window.addEventListener('load', function() {
+            console.log('All scripts loaded, checking status...');
+            console.log('Script status:', scriptsLoaded);
+            
+            if (!checkScriptsLoaded()) {
+                console.log('Some scripts failed to load, using fallback');
+            } else {
+                console.log('All scripts loaded successfully!');
+            }
         });
         
         function initializeInlineForm() {
