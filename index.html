@@ -6,7 +6,7 @@
     <title>Travel + Event Hybrid Recommender</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" onload="console.log('Leaflet library loaded successfully')" onerror="console.error('Failed to load Leaflet library')"></script>
     <script src="shared-database.js" onerror="console.error('Failed to load shared-database.js')" onload="scriptsLoaded.sharedDatabase = true; console.log('shared-database.js loaded successfully')"></script>
     <script src="recommendation-engine.js" onerror="console.error('Failed to load recommendation-engine.js')" onload="scriptsLoaded.recommendationEngine = true; console.log('recommendation-engine.js loaded successfully')"></script>
     <script src="sample_reviews.js" onerror="console.error('Failed to load sample_reviews.js')" onload="scriptsLoaded.sampleReviews = true; console.log('sample_reviews.js loaded successfully')"></script>
@@ -940,113 +940,160 @@
             
             console.log('✅ Map element found, dimensions:', mapElement.offsetWidth, 'x', mapElement.offsetHeight);
             
-            // Try multiple approaches to create the map
-            try {
-                // Approach 1: Try Leaflet
-                if (typeof L !== 'undefined') {
-                    console.log('✅ Leaflet library loaded, trying Leaflet map');
-                    createLeafletMap(events, mapElement);
-                } else {
-                    console.log('❌ Leaflet library not loaded, trying fallback');
+            // Ensure map element is visible and has proper dimensions
+            mapElement.style.minHeight = '400px';
+            mapElement.style.width = '100%';
+            mapElement.style.display = 'block';
+            
+            // Wait a bit for DOM to be ready, then try to create map
+            setTimeout(() => {
+                try {
+                    // Check if Leaflet is loaded
+                    if (typeof L !== 'undefined' && L.map && L.marker && L.tileLayer) {
+                        console.log('✅ Leaflet library fully loaded, trying Leaflet map');
+                        createLeafletMap(events, mapElement);
+                    } else {
+                        console.log('❌ Leaflet library not fully loaded, trying fallback');
+                        console.log('L available:', typeof L !== 'undefined');
+                        console.log('L.map available:', typeof L !== 'undefined' && L.map);
+                        console.log('L.marker available:', typeof L !== 'undefined' && L.marker);
+                        console.log('L.tileLayer available:', typeof L !== 'undefined' && L.tileLayer);
+                        createFallbackMap(events, mapElement);
+                    }
+                } catch (error) {
+                    console.error('❌ Error creating map:', error);
                     createFallbackMap(events, mapElement);
                 }
-            } catch (error) {
-                console.error('❌ Error creating map:', error);
-                createFallbackMap(events, mapElement);
-            }
+            }, 200);
             
             console.log('=== MAP DEBUG END ===');
         }
         
         function createLeafletMap(events, mapElement) {
+            console.log('Creating Leaflet map...');
+            console.log('Map element:', mapElement);
+            console.log('Map element dimensions:', mapElement.offsetWidth, 'x', mapElement.offsetHeight);
+            
             // Clear existing map
             if (window.map) {
                 console.log('Removing existing map');
                 window.map.remove();
+                window.map = null;
             }
+            
+            // Clear the map element content
+            mapElement.innerHTML = '';
             
             // Initialize map with a default center
             let mapCenter = [0, 0];
             let mapZoom = 2;
             
-            // If we have events, use their coordinates to center the map
-            if (events && events.length > 0) {
-                console.log('Creating Leaflet map with', events.length, 'events');
-                
-                const group = new L.featureGroup();
-                let validMarkers = 0;
-                
-                events.forEach((event, index) => {
-                    console.log(`Event ${index + 1}:`, event.title, 'Coordinates:', event.lat, event.lon);
+            try {
+                // If we have events, use their coordinates to center the map
+                if (events && events.length > 0) {
+                    console.log('Creating Leaflet map with', events.length, 'events');
                     
-                    if (event.lat && event.lon && event.lat !== 0 && event.lon !== 0) {
-                        console.log('✅ Adding marker for:', event.title, 'at', event.lat, event.lon);
+                    const group = new L.featureGroup();
+                    let validMarkers = 0;
+                    
+                    events.forEach((event, index) => {
+                        console.log(`Event ${index + 1}:`, event.title, 'Coordinates:', event.lat, event.lon);
                         
-                        const marker = L.marker([event.lat, event.lon])
-                            .bindPopup(`
-                                <div class="p-2">
-                                    <h4 class="font-semibold">${event.title}</h4>
-                                    <p class="text-sm text-gray-600">${event.category}</p>
-                                    <p class="text-xs text-gray-500">${event.city}</p>
-                                    <p class="text-xs text-gray-500">${formatDateTime(event.start_time)}</p>
-                                    <div class="mt-1">
-                                        <span class="rating-badge text-white text-xs px-2 py-1 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500">
-                                            ${event.rating.toFixed(1)} ⭐
-                                        </span>
+                        if (event.lat && event.lon && event.lat !== 0 && event.lon !== 0) {
+                            console.log('✅ Adding marker for:', event.title, 'at', event.lat, event.lon);
+                            
+                            const marker = L.marker([event.lat, event.lon])
+                                .bindPopup(`
+                                    <div class="p-2">
+                                        <h4 class="font-semibold">${event.title}</h4>
+                                        <p class="text-sm text-gray-600">${event.category}</p>
+                                        <p class="text-xs text-gray-500">${event.city}</p>
+                                        <p class="text-xs text-gray-500">${formatDateTime(event.start_time)}</p>
+                                        <div class="mt-1">
+                                            <span class="rating-badge text-white text-xs px-2 py-1 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500">
+                                                ${event.rating.toFixed(1)} ⭐
+                                            </span>
+                                        </div>
+                                        <div class="mt-1">
+                                            <button onclick="showEventDetails(${event.id})" class="bg-blue-500 text-white text-xs px-2 py-1 rounded hover:bg-blue-600">
+                                                View Details
+                                            </button>
+                                        </div>
                                     </div>
-                                    <div class="mt-1">
-                                        <button onclick="showEventDetails(${event.id})" class="bg-blue-500 text-white text-xs px-2 py-1 rounded hover:bg-blue-600">
-                                            View Details
-                                        </button>
-                                    </div>
-                                </div>
-                            `);
-                        group.addLayer(marker);
-                        validMarkers++;
+                                `);
+                            group.addLayer(marker);
+                            validMarkers++;
+                        } else {
+                            console.log('❌ Skipping event with invalid coordinates:', event.title, 'lat:', event.lat, 'lon:', event.lon);
+                        }
+                    });
+                    
+                    console.log('Valid markers created:', validMarkers);
+                    
+                    if (validMarkers > 0) {
+                        console.log('Creating Leaflet map with markers...');
+                        
+                        // Create map
+                        window.map = L.map('map', {
+                            preferCanvas: true,
+                            zoomControl: true
+                        });
+                        
+                        // Add tiles
+                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                            attribution: '© OpenStreetMap contributors',
+                            maxZoom: 19
+                        }).addTo(window.map);
+                        
+                        console.log('Leaflet map created, adding markers...');
+                        
+                        // Add markers to map
+                        group.eachLayer(marker => marker.addTo(window.map));
+                        
+                        console.log('Markers added, fitting bounds...');
+                        
+                        // Fit map to show all markers
+                        const bounds = group.getBounds();
+                        console.log('Map bounds:', bounds);
+                        window.map.fitBounds(bounds.pad(0.1));
+                        
+                        console.log('✅ Leaflet map created successfully with', validMarkers, 'markers');
                     } else {
-                        console.log('❌ Skipping event with invalid coordinates:', event.title, 'lat:', event.lat, 'lon:', event.lon);
+                        console.log('❌ No valid markers, showing default Leaflet map');
+                        // No valid markers, show world map
+                        window.map = L.map('map', {
+                            preferCanvas: true,
+                            zoomControl: true
+                        }).setView(mapCenter, mapZoom);
+                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                            attribution: '© OpenStreetMap contributors',
+                            maxZoom: 19
+                        }).addTo(window.map);
                     }
-                });
-                
-                console.log('Valid markers created:', validMarkers);
-                
-                if (validMarkers > 0) {
-                    console.log('Creating Leaflet map with markers...');
-                    
-                    // Create map and add tiles
-                    window.map = L.map('map');
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        attribution: '© OpenStreetMap contributors'
-                    }).addTo(window.map);
-                    
-                    console.log('Leaflet map created, adding markers...');
-                    
-                    // Add markers to map
-                    group.eachLayer(marker => marker.addTo(window.map));
-                    
-                    console.log('Markers added, fitting bounds...');
-                    
-                    // Fit map to show all markers
-                    const bounds = group.getBounds();
-                    console.log('Map bounds:', bounds);
-                    window.map.fitBounds(bounds.pad(0.1));
-                    
-                    console.log('✅ Leaflet map created successfully with', validMarkers, 'markers');
                 } else {
-                    console.log('❌ No valid markers, showing default Leaflet map');
-                    // No valid markers, show world map
-                    window.map = L.map('map').setView(mapCenter, mapZoom);
+                    console.log('❌ No events, showing default Leaflet map');
+                    // No events, show world map
+                    window.map = L.map('map', {
+                        preferCanvas: true,
+                        zoomControl: true
+                    }).setView(mapCenter, mapZoom);
                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        attribution: '© OpenStreetMap contributors'
+                        attribution: '© OpenStreetMap contributors',
+                        maxZoom: 19
                     }).addTo(window.map);
                 }
-            } else {
-                console.log('❌ No events, showing default Leaflet map');
-                // No events, show world map
-                window.map = L.map('map').setView(mapCenter, mapZoom);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap contributors'
-                }).addTo(window.map);
+                
+                // Force map to invalidate size after creation
+                setTimeout(() => {
+                    if (window.map) {
+                        window.map.invalidateSize();
+                        console.log('Map size invalidated');
+                    }
+                }, 200);
+                
+            } catch (error) {
+                console.error('❌ Error creating Leaflet map:', error);
+                throw error; // Re-throw to trigger fallback
             }
         }
         
