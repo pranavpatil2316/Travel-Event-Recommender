@@ -3,13 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Travel + Event Hybrid Recommender</title>
+    <title>Travel Event Recommender</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" onload="console.log('Leaflet library loaded successfully')" onerror="console.error('Failed to load Leaflet library')"></script>
-    <script src="shared-database.js" onerror="console.error('Failed to load shared-database.js')" onload="scriptsLoaded.sharedDatabase = true; console.log('shared-database.js loaded successfully')"></script>
-    <script src="recommendation-engine.js" onerror="console.error('Failed to load recommendation-engine.js')" onload="scriptsLoaded.recommendationEngine = true; console.log('recommendation-engine.js loaded successfully')"></script>
-    <script src="sample_reviews.js" onerror="console.error('Failed to load sample_reviews.js')" onload="scriptsLoaded.sampleReviews = true; console.log('sample_reviews.js loaded successfully')"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         #map { height: 400px; }
         .event-card {
@@ -17,37 +14,6 @@
         }
         .event-card:hover {
             transform: translateY(-2px);
-        }
-        .score-badge {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        .interest-category {
-            transition: all 0.3s ease;
-        }
-        .interest-category:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        }
-        .popup-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .popup-content {
-            background: white;
-            border-radius: 12px;
-            padding: 24px;
-            max-width: 500px;
-            max-height: 80vh;
-            overflow-y: auto;
-            margin: 20px;
         }
         .star-rating {
             display: inline-flex;
@@ -65,17 +31,14 @@
         .star:hover {
             color: #f59e0b;
         }
-        .review-card {
-            border-left: 4px solid #3b82f6;
-        }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
     <!-- Header -->
     <header class="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-8">
         <div class="container mx-auto px-4 text-center">
-            <h1 class="text-4xl font-bold mb-2">Travel + Event Hybrid Recommender</h1>
-            <p class="text-lg opacity-90">Discover amazing events and hidden gems during your travels</p>
+            <h1 class="text-4xl font-bold mb-2">Travel Event Recommender</h1>
+            <p class="text-lg opacity-90">Discover amazing events during your travels</p>
         </div>
     </header>
 
@@ -89,65 +52,63 @@
                     <!-- Country -->
                     <div>
                         <label for="country" class="block text-sm font-medium text-gray-700 mb-2">Country</label>
-                        <select id="country" name="country" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        <select id="country" name="country" required class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                             <option value="">Select a country...</option>
-                            <option value="France">France</option>
-                            <option value="Japan">Japan</option>
-                            <option value="United Kingdom">United Kingdom</option>
-                            <option value="Italy">Italy</option>
-                            <option value="Spain">Spain</option>
-                            <option value="Germany">Germany</option>
-                            <option value="United States">United States</option>
-                            <option value="Canada">Canada</option>
+                            <option value="Argentina">Argentina</option>
                             <option value="Australia">Australia</option>
-                            <option value="India">India</option>
-                            <option value="Thailand">Thailand</option>
                             <option value="Brazil">Brazil</option>
+                            <option value="Canada">Canada</option>
+                            <option value="China">China</option>
+                            <option value="Egypt">Egypt</option>
+                            <option value="France">France</option>
+                            <option value="Germany">Germany</option>
+                            <option value="India">India</option>
+                            <option value="Italy">Italy</option>
+                            <option value="Japan">Japan</option>
                             <option value="Mexico">Mexico</option>
-                            <option value="South Korea">South Korea</option>
-                            <option value="Singapore">Singapore</option>
+                            <option value="Russia">Russia</option>
+                            <option value="South Africa">South Africa</option>
+                            <option value="Spain">Spain</option>
+                            <option value="Thailand">Thailand</option>
+                            <option value="Turkey">Turkey</option>
+                            <option value="United Kingdom">United Kingdom</option>
+                            <option value="United States">United States</option>
                         </select>
                     </div>
 
                     <!-- City -->
                     <div>
                         <label for="city" class="block text-sm font-medium text-gray-700 mb-2">City (Optional)</label>
-                        <select id="city" name="city" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" disabled>
+                        <select id="city" name="city" class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent" disabled>
                             <option value="">Select a country first...</option>
                         </select>
-                        <div id="cityLoading" class="hidden text-sm text-gray-500 mt-1">Loading cities...</div>
-                        <p class="text-xs text-gray-500 mt-1">Leave empty to see events from all cities in the country</p>
                     </div>
 
                     <!-- Season -->
                     <div>
-                        <label for="season" class="block text-sm font-medium text-gray-700 mb-2">Travel Season</label>
-                        <select id="season" name="season" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                            <option value="">Select a season...</option>
-                            <option value="spring">Spring (Mar-May)</option>
-                            <option value="summer">Summer (Jun-Aug)</option>
-                            <option value="autumn">Autumn (Sep-Nov)</option>
-                            <option value="winter">Winter (Dec-Feb)</option>
+                        <label for="season" class="block text-sm font-medium text-gray-700 mb-2">Season</label>
+                        <select id="season" name="season" required class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="spring">Spring</option>
+                            <option value="summer">Summer</option>
+                            <option value="autumn">Autumn</option>
+                            <option value="winter">Winter</option>
                         </select>
                     </div>
 
                     <!-- Duration -->
                     <div>
-                        <label for="duration" class="block text-sm font-medium text-gray-700 mb-2">Trip Duration</label>
-                        <select id="duration" name="duration" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                            <option value="">Select duration...</option>
+                        <label for="duration" class="block text-sm font-medium text-gray-700 mb-2">Duration</label>
+                        <select id="duration" name="duration" required class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                             <option value="weekend">Weekend (2-3 days)</option>
-                            <option value="week">Week (5-7 days)</option>
-                            <option value="extended">Extended (10+ days)</option>
+                            <option value="week">Week (7 days)</option>
+                            <option value="extended">Extended (2+ weeks)</option>
                         </select>
                     </div>
                 </div>
 
-                <div class="flex justify-center pt-4">
-                    <button type="submit" class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-105">
-                        Get Personalized Recommendations
-                    </button>
-                </div>
+                <button type="submit" class="w-full bg-blue-600 text-white py-3 px-6 rounded-md hover:bg-blue-700 transition-colors font-semibold">
+                    Get Recommendations
+                </button>
             </form>
         </div>
 
@@ -156,74 +117,44 @@
             <!-- Loading State -->
             <div id="loadingState" class="text-center py-8">
                 <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                <p class="mt-2 text-gray-600">Loading all events for your destination...</p>
+                <p class="mt-2 text-gray-600">Finding the best events for you...</p>
             </div>
 
             <!-- Error State -->
-            <div id="errorState" class="hidden bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-                <div class="flex">
-                    <div class="flex-shrink-0">
-                        <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                        </svg>
-                    </div>
-                    <div class="ml-3">
-                        <h3 class="text-sm font-medium text-red-800">No data available</h3>
-                        <div class="mt-2 text-sm text-red-700">
-                            <p id="errorMessage">No sample data for this city yet.</p>
-                        </div>
-                    </div>
+            <div id="errorState" class="hidden text-center py-8">
+                <div class="text-red-600 mb-4">
+                    <svg class="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                    </svg>
                 </div>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">Error Loading Events</h3>
+                <p id="errorMessage" class="text-gray-600 mb-4">We're having trouble loading events right now.</p>
+                <button onclick="location.reload()" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                    Reload Page
+                </button>
             </div>
 
             <!-- Results Content -->
             <div id="resultsContent" class="hidden">
-                <!-- Summary -->
-                <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
-                    <h2 class="text-2xl font-semibold mb-4 text-gray-800">Your Personalized Recommendations</h2>
-                    <div id="summaryStats" class="grid grid-cols-1 md:grid-cols-4 gap-4 text-center">
-                        <!-- Stats will be populated by JavaScript -->
-                    </div>
-                </div>
+                <!-- Summary Stats -->
+                <div id="summaryStats" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"></div>
 
                 <!-- Interest Categories -->
-                <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
-                    <h3 class="text-xl font-semibold mb-4 text-gray-800">Events by Interest Category</h3>
-                    <div id="interestCategories" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <!-- Interest categories will be populated by JavaScript -->
-                    </div>
-                </div>
+                <div id="interestCategories" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8"></div>
 
-                <!-- Upcoming Events -->
-                <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
-                    <h3 class="text-xl font-semibold mb-4 text-gray-800">Upcoming Events</h3>
-                    <div class="mb-4">
-                        <label for="upcomingDays" class="block text-sm font-medium text-gray-700 mb-2">Show events for next:</label>
-                        <select id="upcomingDays" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="7">7 days</option>
-                            <option value="30" selected>30 days</option>
-                            <option value="90">90 days</option>
-                        </select>
+                <!-- Events and Map Layout -->
+                <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-8">
+                    <!-- Events List -->
+                    <div class="lg:col-span-3">
+                        <div id="eventsList" class="space-y-4"></div>
                     </div>
-                    <div id="upcomingEvents" class="space-y-4">
-                        <!-- Upcoming events will be populated by JavaScript -->
-                    </div>
-                </div>
-
-                <!-- Events List -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <!-- Events -->
-                    <div class="bg-white rounded-lg shadow-lg p-6">
-                        <h3 class="text-xl font-semibold mb-4 text-gray-800">All Events</h3>
-                        <div id="eventsList" class="space-y-4">
-                            <!-- Events will be populated by JavaScript -->
-                        </div>
-                    </div>
-
+                    
                     <!-- Map -->
-                    <div class="bg-white rounded-lg shadow-lg p-6">
-                        <h3 class="text-xl font-semibold mb-4 text-gray-800">Event Locations</h3>
-                        <div id="map" class="rounded-lg"></div>
+                    <div class="lg:col-span-2">
+                        <div class="bg-white rounded-lg shadow-lg p-6 sticky top-4">
+                            <h3 class="text-xl font-semibold mb-4">Event Locations</h3>
+                            <div id="map" style="height: 500px;"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -231,894 +162,632 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-gray-800 text-white py-6 mt-12">
+    <footer class="bg-gray-800 text-white py-8 mt-16">
         <div class="container mx-auto px-4 text-center">
             <p class="text-gray-400">Built with ❤️ using TailwindCSS, LeafletJS, and pure JavaScript</p>
         </div>
     </footer>
 
-    <script src="script.js" onerror="console.error('Failed to load script.js')" onload="scriptsLoaded.mainScript = true; console.log('script.js loaded successfully')"></script>
     <script>
-        // Track script loading status
-        let scriptsLoaded = {
-            sharedDatabase: false,
-            recommendationEngine: false,
-            sampleReviews: false,
-            mainScript: false
+        // Events data will be loaded from local JSON files
+        let eventsData = [];
+
+        // Country to cities mapping
+        const countryCities = {
+            'India': ['Mumbai', 'Delhi', 'Bangalore', 'Hyderabad', 'Ahmedabad', 'Chennai', 'Kolkata', 'Pune', 'Agra'],
+            'Japan': ['Tokyo', 'Osaka', 'Kyoto', 'Yokohama', 'Nagoya', 'Sapporo', 'Fukuoka', 'Kobe'],
+            'United Kingdom': ['London', 'Manchester', 'Birmingham', 'Glasgow', 'Liverpool', 'Edinburgh', 'Bristol', 'Leeds'],
+            'Italy': ['Rome', 'Milan', 'Naples', 'Turin', 'Palermo', 'Genoa', 'Bologna', 'Florence', 'Venice'],
+            'Spain': ['Madrid', 'Barcelona', 'Valencia', 'Seville', 'Zaragoza', 'Málaga', 'Murcia', 'Palma'],
+            'Brazil': ['Rio de Janeiro', 'São Paulo', 'Salvador', 'Brasília', 'Fortaleza', 'Belo Horizonte', 'Manaus', 'Curitiba'],
+            'Canada': ['Toronto', 'Vancouver', 'Montreal', 'Calgary', 'Ottawa', 'Edmonton', 'Winnipeg', 'Quebec City'],
+            'Mexico': ['Mexico City', 'Cancun', 'Guadalajara', 'Monterrey', 'Puebla', 'Tijuana', 'León', 'Juárez'],
+            'South Africa': ['Cape Town', 'Johannesburg', 'Durban', 'Pretoria', 'Port Elizabeth', 'Bloemfontein', 'East London', 'Nelspruit'],
+            'Thailand': ['Bangkok', 'Chiang Mai', 'Phuket', 'Pattaya', 'Krabi', 'Koh Samui', 'Ayutthaya', 'Sukhothai'],
+            'Egypt': ['Cairo', 'Luxor', 'Aswan', 'Alexandria', 'Giza', 'Hurghada', 'Sharm El Sheikh', 'Dahab'],
+            'Turkey': ['Istanbul', 'Cappadocia', 'Antalya', 'Ankara', 'Izmir', 'Bursa', 'Trabzon', 'Gaziantep'],
+            'Russia': ['Moscow', 'St. Petersburg', 'Kazan', 'Novosibirsk', 'Yekaterinburg', 'Nizhny Novgorod', 'Samara', 'Omsk'],
+            'China': ['Beijing', 'Shanghai', 'Xi\'an', 'Guangzhou', 'Shenzhen', 'Chengdu', 'Hangzhou', 'Nanjing'],
+            'Argentina': ['Buenos Aires', 'Mendoza', 'Ushuaia', 'Córdoba', 'Rosario', 'La Plata', 'Mar del Plata', 'Salta'],
+            'Australia': ['Sydney', 'Melbourne', 'Brisbane', 'Perth', 'Adelaide', 'Gold Coast', 'Newcastle', 'Canberra'],
+            'France': ['Paris', 'Lyon', 'Marseille', 'Nice', 'Toulouse', 'Nantes', 'Strasbourg', 'Montpellier'],
+            'Germany': ['Berlin', 'Hamburg', 'Munich', 'Cologne', 'Frankfurt', 'Stuttgart', 'Düsseldorf', 'Dortmund'],
+            'United States': ['New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix', 'Philadelphia', 'San Antonio', 'San Diego']
         };
-        
-        // Check if all required scripts are loaded
-        function checkScriptsLoaded() {
-            return scriptsLoaded.sharedDatabase && 
-                   scriptsLoaded.recommendationEngine && 
-                   scriptsLoaded.sampleReviews && 
-                   scriptsLoaded.mainScript;
-        }
-        
-        // Inline fallback with full functionality
+
+        // Global variables
+        let map;
+        let markers = [];
+
+        // Initialize the application
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Inline script loaded');
-            
-            // Check if main script loaded
-            setTimeout(function() {
-                const form = document.getElementById('recommendationForm');
-                if (form && !form.hasAttribute('data-handler-attached')) {
-                    console.log('Main script failed, using inline handler');
-                    
-                    // Initialize form with inline functionality
-                    initializeInlineForm();
-                } else if (form && form.hasAttribute('data-handler-attached')) {
-                    console.log('Main script loaded successfully - full functionality available');
-                }
-            }, 2000); // Increased timeout to give more time for scripts to load
+            initializeForm();
+            setDefaultSeason();
+            loadInitialEvents();
         });
-        
-        // Listen for script load events
-        window.addEventListener('load', function() {
-            console.log('All scripts loaded, checking status...');
-            console.log('Script status:', scriptsLoaded);
-            
-            if (!checkScriptsLoaded()) {
-                console.log('Some scripts failed to load, using fallback');
-            } else {
-                console.log('All scripts loaded successfully!');
+
+        // Load initial events from local JSON files
+        async function loadInitialEvents() {
+            try {
+                console.log('Loading events from local JSON files...');
+                eventsData = await loadEventsFromFiles();
+                console.log(`Loaded ${eventsData.length} events from local files`);
+            } catch (error) {
+                console.error('Error loading events from files:', error);
+                // Fallback to sample data
+                eventsData = getSampleEvents();
+                console.log('Using sample data as fallback');
             }
-        });
-        
-        function initializeInlineForm() {
+        }
+
+        // Load events from local JSON files
+        async function loadEventsFromFiles() {
+            const allEvents = [];
+            const countries = ['India', 'Japan', 'United Kingdom', 'Italy', 'Spain', 'Brazil', 'Canada', 'Mexico', 'South Africa', 'Thailand', 'Egypt', 'Turkey', 'Russia', 'China', 'Argentina', 'Australia', 'France', 'Germany', 'United States'];
+            
+            for (const country of countries) {
+                try {
+                    // Handle country names with spaces and special characters
+                    let filename;
+                    if (country === 'United Kingdom') {
+                        filename = 'events/events-uk.json';
+                    } else if (country === 'United States') {
+                        filename = 'events/events-usa.json';
+                    } else if (country === 'South Africa') {
+                        filename = 'events/events-southafrica.json';
+                    } else {
+                        filename = `events/events-${country.toLowerCase().replace(' ', '-')}.json`;
+                    }
+                    
+                    const response = await fetch(filename);
+                    
+                    if (!response.ok) {
+                        console.warn(`Could not load ${filename}`);
+                        continue;
+                    }
+                    
+                    const countryData = await response.json();
+                    
+                    // Extract all events from all cities in this country
+                    Object.values(countryData.cities).forEach(cityEvents => {
+                        allEvents.push(...cityEvents);
+                    });
+                    
+                    console.log(`Loaded events for ${country}`);
+                } catch (error) {
+                    console.error(`Error loading events for ${country}:`, error);
+                }
+            }
+            
+            return allEvents;
+        }
+
+
+
+        // Fallback sample events
+        function getSampleEvents() {
+            return [
+                {
+                    id: 1,
+                    title: "Taj Mahal Sunrise Tour",
+                    description: "Experience the breathtaking beauty of the Taj Mahal at sunrise with a guided tour.",
+                    category: "Sightseeing",
+                    start_time: "2024-03-15T06:00:00Z",
+                    end_time: "2024-03-15T10:00:00Z",
+                    lat: 27.1751,
+                    lon: 78.0421,
+                    city: "Agra",
+                    country: "India",
+                    indoor_outdoor: "outdoor",
+                    rating: 4.8,
+                    ratingCount: 1247,
+                    source: "Sample"
+                },
+                {
+                    id: 2,
+                    title: "Eiffel Tower Visit",
+                    description: "Climb the iconic Eiffel Tower for panoramic views of Paris.",
+                    category: "Sightseeing",
+                    start_time: "2024-03-23T10:00:00Z",
+                    end_time: "2024-03-23T12:00:00Z",
+                    lat: 48.8584,
+                    lon: 2.2945,
+                    city: "Paris",
+                    country: "France",
+                    indoor_outdoor: "outdoor",
+                    rating: 4.9,
+                    ratingCount: 2156,
+                    source: "Sample"
+                },
+                {
+                    id: 3,
+                    title: "Tokyo Skytree Observation",
+                    description: "Enjoy breathtaking views from Tokyo's tallest structure.",
+                    category: "Sightseeing",
+                    start_time: "2024-03-27T14:00:00Z",
+                    end_time: "2024-03-27T16:00:00Z",
+                    lat: 35.7101,
+                    lon: 139.8107,
+                    city: "Tokyo",
+                    country: "Japan",
+                    indoor_outdoor: "indoor",
+                    rating: 4.6,
+                    ratingCount: 987,
+                    source: "Sample"
+                },
+                {
+                    id: 4,
+                    title: "Big Ben and Westminster Tour",
+                    description: "Explore London's iconic landmarks including Big Ben and Westminster Abbey.",
+                    category: "History & Heritage",
+                    start_time: "2024-03-31T10:00:00Z",
+                    end_time: "2024-03-31T13:00:00Z",
+                    lat: 51.4994,
+                    lon: -0.1245,
+                    city: "London",
+                    country: "United Kingdom",
+                    indoor_outdoor: "outdoor",
+                    rating: 4.7,
+                    ratingCount: 1456,
+                    source: "Sample"
+                }
+            ];
+        }
+
+        // Initialize form functionality
+        function initializeForm() {
             const form = document.getElementById('recommendationForm');
             const countrySelect = document.getElementById('country');
             const citySelect = document.getElementById('city');
-            const cityLoading = document.getElementById('cityLoading');
-            
+
             // Handle country selection
-            if (countrySelect) {
-                countrySelect.addEventListener('change', function() {
-                    const selectedCountry = this.value;
-                    
-                    if (selectedCountry) {
-                        if (cityLoading) cityLoading.classList.remove('hidden');
-                        if (citySelect) {
-                            citySelect.disabled = true;
-                            citySelect.innerHTML = '<option value="">Loading cities...</option>';
-                        }
-                        
-                        setTimeout(() => {
-                            loadCitiesInline(selectedCountry);
-                        }, 500);
-                    } else {
-                        if (citySelect) {
-                            citySelect.disabled = true;
-                            citySelect.innerHTML = '<option value="">Select a country first...</option>';
-                        }
-                        if (cityLoading) cityLoading.classList.add('hidden');
-                    }
-                });
-            }
-            
+            countrySelect.addEventListener('change', function() {
+                const selectedCountry = this.value;
+                
+                if (selectedCountry) {
+                    loadCitiesForCountry(selectedCountry);
+                } else {
+                    citySelect.disabled = true;
+                    citySelect.innerHTML = '<option value="">Select a country first...</option>';
+                }
+            });
+
             // Handle form submission
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
-                console.log('Inline handler: Form submission prevented');
-                
-                const formData = new FormData(form);
-                const country = formData.get('country');
-                const city = formData.get('city');
-                const season = formData.get('season');
-                const duration = formData.get('duration');
-                
-                if (!country || !season || !duration) {
-                    alert('Please fill in all required fields');
-                    return false;
-                }
-                
-                // Show results with sample data
-                showInlineResults(country, city, season, duration);
-                return false;
+                handleFormSubmission();
             });
-            
-            // Set default season
-            const seasonSelect = document.getElementById('season');
-            if (seasonSelect) {
-                const currentMonth = new Date().getMonth() + 1;
-                let defaultSeason = 'spring';
-                if (currentMonth >= 3 && currentMonth <= 5) defaultSeason = 'spring';
-                else if (currentMonth >= 6 && currentMonth <= 8) defaultSeason = 'summer';
-                else if (currentMonth >= 9 && currentMonth <= 11) defaultSeason = 'autumn';
-                else defaultSeason = 'winter';
-                
-                seasonSelect.value = defaultSeason;
-            }
-            
-            form.setAttribute('data-handler-attached', 'true');
         }
-        
-        function loadCitiesInline(country) {
+
+        // Load cities for selected country
+        function loadCitiesForCountry(country) {
             const citySelect = document.getElementById('city');
-            const cityLoading = document.getElementById('cityLoading');
+            const cities = countryCities[country] || [];
             
-            const cityMap = {
-                'France': ['Paris', 'Lyon', 'Marseille', 'Nice', 'Toulouse'],
-                'Japan': ['Tokyo', 'Osaka', 'Kyoto', 'Hiroshima', 'Nagoya'],
-                'United Kingdom': ['London', 'Manchester', 'Birmingham', 'Liverpool', 'Edinburgh'],
-                'Italy': ['Rome', 'Milan', 'Naples', 'Florence', 'Venice'],
-                'Spain': ['Madrid', 'Barcelona', 'Seville', 'Valencia', 'Bilbao'],
-                'Germany': ['Berlin', 'Munich', 'Hamburg', 'Cologne', 'Frankfurt'],
-                'United States': ['New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix'],
-                'Canada': ['Toronto', 'Vancouver', 'Montreal', 'Calgary', 'Ottawa'],
-                'Australia': ['Sydney', 'Melbourne', 'Brisbane', 'Perth', 'Adelaide'],
-                'India': ['Mumbai', 'Delhi', 'Bangalore', 'Chennai', 'Kolkata'],
-                'Thailand': ['Bangkok', 'Chiang Mai', 'Phuket', 'Pattaya', 'Krabi'],
-                'Brazil': ['São Paulo', 'Rio de Janeiro', 'Brasília', 'Salvador', 'Fortaleza'],
-                'Mexico': ['Mexico City', 'Guadalajara', 'Monterrey', 'Puebla', 'Tijuana'],
-                'South Korea': ['Seoul', 'Busan', 'Incheon', 'Daegu', 'Daejeon'],
-                'Singapore': ['Singapore']
-            };
+            citySelect.innerHTML = '<option value="">All cities in country...</option>';
             
-            const cities = cityMap[country] || [];
-            
-            if (citySelect) {
-                citySelect.innerHTML = '<option value="">All cities in country...</option>';
-                cities.forEach(city => {
-                    const option = document.createElement('option');
-                    option.value = city;
-                    option.textContent = city;
-                    citySelect.appendChild(option);
-                });
-                citySelect.disabled = false;
-            }
-            
-            if (cityLoading) cityLoading.classList.add('hidden');
-        }
-        
-        function showInlineResults(country, city, season, duration) {
-            // Show results section
-            const resultsSection = document.getElementById('resultsSection');
-            if (resultsSection) {
-                resultsSection.classList.remove('hidden');
-                resultsSection.scrollIntoView({ behavior: 'smooth' });
-            }
-            
-            // Hide loading, show content
-            const loadingState = document.getElementById('loadingState');
-            const resultsContent = document.getElementById('resultsContent');
-            
-            if (loadingState) loadingState.classList.add('hidden');
-            if (resultsContent) resultsContent.classList.remove('hidden');
-            
-            // Get comprehensive sample events with coordinates
-            const sampleEvents = getSampleEvents(country, city, season, duration);
-            
-            // Display results
-            displayInlineResults(sampleEvents, city || 'All Cities', country, season);
-            
-            // Display map
-            displayMap(sampleEvents, city || country);
-        }
-        
-        function getSampleEvents(country, city, season, duration) {
-            // City coordinates for map
-            const cityCoordinates = {
-                'Paris': [48.8566, 2.3522],
-                'Tokyo': [35.6762, 139.6503],
-                'London': [51.5074, -0.1278],
-                'Rome': [41.9028, 12.4964],
-                'Madrid': [40.4168, -3.7038],
-                'Berlin': [52.5200, 13.4050],
-                'New York': [40.7128, -74.0060],
-                'Los Angeles': [34.0522, -118.2437],
-                'Toronto': [43.6532, -79.3832],
-                'Vancouver': [49.2827, -123.1207],
-                'Sydney': [-33.8688, 151.2093],
-                'Melbourne': [-37.8136, 144.9631],
-                'Mumbai': [19.0760, 72.8777],
-                'Delhi': [28.7041, 77.1025],
-                'Bangkok': [13.7563, 100.5018],
-                'São Paulo': [-23.5505, -46.6333],
-                'Rio de Janeiro': [-22.9068, -43.1729],
-                'Mexico City': [19.4326, -99.1332],
-                'Seoul': [37.5665, 126.9780],
-                'Singapore': [1.3521, 103.8198],
-                'Lyon': [45.7640, 4.8357],
-                'Marseille': [43.2965, 5.3698],
-                'Osaka': [34.6937, 135.5023],
-                'Kyoto': [35.0116, 135.7681],
-                'Manchester': [53.4808, -2.2426],
-                'Birmingham': [52.4862, -1.8904],
-                'Milan': [45.4642, 9.1900],
-                'Naples': [40.8518, 14.2681],
-                'Barcelona': [41.3851, 2.1734],
-                'Valencia': [39.4699, -0.3763],
-                'Munich': [48.1351, 11.5820],
-                'Hamburg': [53.5511, 9.9937],
-                'Chicago': [41.8781, -87.6298],
-                'Houston': [29.7604, -95.3698],
-                'Montreal': [45.5017, -73.5673],
-                'Calgary': [51.0447, -114.0719],
-                'Brisbane': [-27.4698, 153.0251],
-                'Perth': [-31.9505, 115.8605],
-                'Bangalore': [12.9716, 77.5946],
-                'Chennai': [13.0827, 80.2707],
-                'Chiang Mai': [18.7883, 98.9853],
-                'Phuket': [7.8804, 98.3923],
-                'Brasília': [-15.7801, -47.9292],
-                'Salvador': [-12.9777, -38.5016],
-                'Guadalajara': [20.6597, -103.3496],
-                'Monterrey': [25.6866, -100.3161],
-                'Busan': [35.1796, 129.0756],
-                'Incheon': [37.4563, 126.7052]
-            };
-            
-            // If city is specified, show events for that city
-            if (city && city.trim() !== '') {
-                return getEventsForCity(city, country, season, cityCoordinates);
-            } else {
-                // If no city specified, show events from multiple cities in the country
-                return getEventsForCountry(country, season, cityCoordinates);
-            }
-        }
-        
-        function getEventsForCity(city, country, season, cityCoordinates) {
-            const baseCoords = cityCoordinates[city] || [0, 0];
-            
-            // Generate unique IDs based on city name
-            const cityHash = city.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
-            
-            const events = [
-                {
-                    id: cityHash + 1,
-                    title: `${city} Cultural Festival`,
-                    description: `Experience the rich culture and traditions of ${city} during ${season}. This vibrant festival showcases local arts, music, and traditions.`,
-                    category: 'Art & Culture',
-                    city: city,
-                    rating: 4.5,
-                    ratingCount: 15,
-                    indoor_outdoor: 'outdoor',
-                    lat: baseCoords[0] + (Math.random() - 0.5) * 0.01,
-                    lon: baseCoords[1] + (Math.random() - 0.5) * 0.01,
-                    start_time: new Date().toISOString(),
-                    end_time: new Date(Date.now() + 86400000).toISOString(),
-                    reviews: [
-                        { user_name: 'Sarah M.', rating: 5, review_text: 'Amazing cultural experience!', date: '2024-01-15' },
-                        { user_name: 'James K.', rating: 4, review_text: 'Great festival, very authentic.', date: '2024-01-10' }
-                    ]
-                },
-                {
-                    id: cityHash + 2,
-                    title: `${city} Food Tour`,
-                    description: `Discover local cuisine and culinary traditions in ${city}. Taste authentic dishes and learn about local food culture.`,
-                    category: 'Food & Drink',
-                    city: city,
-                    rating: 4.7,
-                    ratingCount: 23,
-                    indoor_outdoor: 'indoor',
-                    lat: baseCoords[0] + (Math.random() - 0.5) * 0.01,
-                    lon: baseCoords[1] + (Math.random() - 0.5) * 0.01,
-                    start_time: new Date().toISOString(),
-                    end_time: new Date(Date.now() + 7200000).toISOString(),
-                    reviews: [
-                        { user_name: 'Maria G.', rating: 5, review_text: 'Delicious food and great guide!', date: '2024-01-12' },
-                        { user_name: 'David W.', rating: 4, review_text: 'Excellent food tour experience.', date: '2024-01-08' }
-                    ]
-                },
-                {
-                    id: cityHash + 3,
-                    title: `${city} Historical Sites`,
-                    description: `Explore historical landmarks and heritage sites in ${city}. Learn about the rich history and architecture.`,
-                    category: 'History & Heritage',
-                    city: city,
-                    rating: 4.3,
-                    ratingCount: 18,
-                    indoor_outdoor: 'outdoor',
-                    lat: baseCoords[0] + (Math.random() - 0.5) * 0.01,
-                    lon: baseCoords[1] + (Math.random() - 0.5) * 0.01,
-                    start_time: new Date().toISOString(),
-                    end_time: new Date(Date.now() + 10800000).toISOString(),
-                    reviews: [
-                        { user_name: 'Emma L.', rating: 4, review_text: 'Fascinating historical tour.', date: '2024-01-14' },
-                        { user_name: 'Michael R.', rating: 5, review_text: 'Great way to learn about local history.', date: '2024-01-11' }
-                    ]
-                }
-            ];
-            
-            // Load stored reviews for each event and merge with default reviews
-            events.forEach(event => {
-                const storedReviews = getStoredReviewsForEvent(event.id);
-                if (storedReviews.length > 0) {
-                    // Merge stored reviews with default reviews
-                    event.reviews = [...event.reviews, ...storedReviews];
-                    
-                    // Recalculate rating based on all reviews
-                    const totalRating = event.reviews.reduce((sum, review) => sum + review.rating, 0);
-                    event.rating = totalRating / event.reviews.length;
-                    event.ratingCount = event.reviews.length;
-                    
-                    console.log(`Loaded ${storedReviews.length} stored reviews for ${event.title}`);
-                }
+            cities.forEach(city => {
+                const option = document.createElement('option');
+                option.value = city;
+                option.textContent = city;
+                citySelect.appendChild(option);
             });
             
-            return events;
+            citySelect.disabled = false;
         }
-        
-        function getEventsForCountry(country, season, cityCoordinates) {
-            const countryCities = {
-                'France': ['Paris', 'Lyon', 'Marseille', 'Nice', 'Toulouse'],
-                'Japan': ['Tokyo', 'Osaka', 'Kyoto', 'Hiroshima', 'Nagoya'],
-                'United Kingdom': ['London', 'Manchester', 'Birmingham', 'Liverpool', 'Edinburgh'],
-                'Italy': ['Rome', 'Milan', 'Naples', 'Florence', 'Venice'],
-                'Spain': ['Madrid', 'Barcelona', 'Seville', 'Valencia', 'Bilbao'],
-                'Germany': ['Berlin', 'Munich', 'Hamburg', 'Cologne', 'Frankfurt'],
-                'United States': ['New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix'],
-                'Canada': ['Toronto', 'Vancouver', 'Montreal', 'Calgary', 'Ottawa'],
-                'Australia': ['Sydney', 'Melbourne', 'Brisbane', 'Perth', 'Adelaide'],
-                'India': ['Mumbai', 'Delhi', 'Bangalore', 'Chennai', 'Kolkata'],
-                'Thailand': ['Bangkok', 'Chiang Mai', 'Phuket', 'Pattaya', 'Krabi'],
-                'Brazil': ['São Paulo', 'Rio de Janeiro', 'Brasília', 'Salvador', 'Fortaleza'],
-                'Mexico': ['Mexico City', 'Guadalajara', 'Monterrey', 'Puebla', 'Tijuana'],
-                'South Korea': ['Seoul', 'Busan', 'Incheon', 'Daegu', 'Daejeon'],
-                'Singapore': ['Singapore']
-            };
+
+        // Set default season based on current month
+        function setDefaultSeason() {
+            const seasonSelect = document.getElementById('season');
+            const currentMonth = new Date().getMonth() + 1;
+            let defaultSeason = 'spring';
             
-            const cities = countryCities[country] || ['City'];
-            let allCountryEvents = [];
+            if (currentMonth >= 3 && currentMonth <= 5) defaultSeason = 'spring';
+            else if (currentMonth >= 6 && currentMonth <= 8) defaultSeason = 'summer';
+            else if (currentMonth >= 9 && currentMonth <= 11) defaultSeason = 'autumn';
+            else defaultSeason = 'winter';
             
-            console.log(`Getting events for ${country} with ${cities.length} cities:`, cities);
+            seasonSelect.value = defaultSeason;
+        }
+
+        // Handle form submission
+        function handleFormSubmission() {
+            const formData = new FormData(document.getElementById('recommendationForm'));
+            const country = formData.get('country');
+            const city = formData.get('city');
+            const season = formData.get('season');
+            const duration = formData.get('duration');
+
+            if (!country || !season || !duration) {
+                alert('Please fill in country, season, and duration fields');
+                return;
+            }
             
-            cities.forEach((city, cityIndex) => {
-                const cityEvents = getEventsForCity(city, country, season, cityCoordinates);
-                console.log(`City ${city}: ${cityEvents.length} events`);
-                allCountryEvents = allCountryEvents.concat(cityEvents);
+            // Show results section and loading state
+            showResultsSection();
+            showLoadingState();
+
+            // Simulate processing delay for better UX
+            setTimeout(() => {
+                try {
+                    const filteredEvents = getFilteredEvents(country, city, season, duration);
+                    displayResults(filteredEvents, city || 'All Cities', country, season);
+                } catch (error) {
+                    console.error('Error in form submission:', error);
+                    showError('Error loading events. Please try again.');
+                }
+            }, 1000);
+        }
+
+        // Get filtered events based on criteria
+        function getFilteredEvents(country, city, season, duration) {
+            let filteredEvents = eventsData.filter(event => {
+                // Filter by country
+                if (event.country !== country) return false;
+                
+                // Filter by city if specified
+                if (city && city.trim() !== '' && event.city !== city) return false;
+                
+                return true;
             });
-            
-            console.log(`Total events for ${country}: ${allCountryEvents.length}`);
-            
+
             // Sort by rating (highest first)
-            allCountryEvents.sort((a, b) => b.rating - a.rating);
-            
-            console.log(`Events sorted by rating. Top 3:`, allCountryEvents.slice(0, 3).map(e => `${e.title} (${e.rating}⭐)`));
-            
-            return allCountryEvents;
+            return filteredEvents.sort((a, b) => b.rating - a.rating);
         }
-        
-        function displayInlineResults(events, city, country, season) {
-            // Display summary
-            const summaryStats = document.getElementById('summaryStats');
-            if (summaryStats) {
-                const avgRating = (events.reduce((sum, event) => sum + event.rating, 0) / events.length).toFixed(1);
-                summaryStats.innerHTML = `
-                    <div class="bg-blue-50 p-4 rounded-lg">
-                        <div class="text-2xl font-bold text-blue-600">${events.length}</div>
-                        <div class="text-sm text-gray-600">Total Events</div>
-                    </div>
-                    <div class="bg-green-50 p-4 rounded-lg">
-                        <div class="text-2xl font-bold text-green-600">${avgRating} ⭐</div>
-                        <div class="text-sm text-gray-600">Avg Rating</div>
-                    </div>
-                    <div class="bg-purple-50 p-4 rounded-lg">
-                        <div class="text-2xl font-bold text-purple-600">${city}</div>
-                        <div class="text-sm text-gray-600">Destination</div>
-                    </div>
-                    <div class="bg-orange-50 p-4 rounded-lg">
-                        <div class="text-2xl font-bold text-orange-600">${season}</div>
-                        <div class="text-sm text-gray-600">Season</div>
-                    </div>
-                `;
+
+        // Show results section
+        function showResultsSection() {
+            document.getElementById('resultsSection').classList.remove('hidden');
+            document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Show loading state
+        function showLoadingState() {
+            document.getElementById('loadingState').classList.remove('hidden');
+            document.getElementById('errorState').classList.add('hidden');
+            document.getElementById('resultsContent').classList.add('hidden');
+        }
+
+        // Show error state
+        function showError(message) {
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('errorState').classList.remove('hidden');
+            document.getElementById('resultsContent').classList.add('hidden');
+            document.getElementById('errorMessage').textContent = message;
+        }
+
+        // Display results
+        function displayResults(events, city, country, season) {
+            document.getElementById('loadingState').classList.add('hidden');
+            
+            if (!events || events.length === 0) {
+                showError(`No events found for ${city}, ${country}.`);
+                return;
             }
             
-            // Display events list
-            const eventsList = document.getElementById('eventsList');
-            if (eventsList) {
-                eventsList.innerHTML = events.map(event => `
-                    <div class="event-card bg-gray-50 p-4 rounded-lg border border-gray-200">
-                        <div class="flex justify-between items-start mb-2">
-                            <h4 class="font-semibold text-gray-800">${event.title}</h4>
-                            <div class="rating-badge text-white text-xs px-2 py-1 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500">
+            document.getElementById('errorState').classList.add('hidden');
+            document.getElementById('resultsContent').classList.remove('hidden');
+            
+            displaySummary(events, city, country, season);
+            displayInterestCategories(events);
+            displayEventsList(events);
+            displayMap(events, city);
+        }
+
+        // Display summary statistics
+        function displaySummary(events, city, country, season) {
+            const summaryContainer = document.getElementById('summaryStats');
+            const avgRating = (events.reduce((sum, event) => sum + event.rating, 0) / events.length).toFixed(1);
+            const indoorEvents = events.filter(event => event.indoor_outdoor === 'indoor').length;
+            const outdoorEvents = events.filter(event => event.indoor_outdoor === 'outdoor').length;
+            const uniqueCities = [...new Set(events.map(event => event.city))].length;
+            
+            summaryContainer.innerHTML = `
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <div class="text-2xl font-bold text-blue-600">${events.length}</div>
+                    <div class="text-sm text-gray-600">Total Events</div>
+                </div>
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <div class="text-2xl font-bold text-green-600">${avgRating} ⭐</div>
+                    <div class="text-sm text-gray-600">Avg Rating</div>
+                </div>
+                <div class="bg-purple-50 p-4 rounded-lg">
+                    <div class="text-2xl font-bold text-purple-600">${indoorEvents}/${outdoorEvents}</div>
+                    <div class="text-sm text-gray-600">Indoor/Outdoor</div>
+                </div>
+                <div class="bg-orange-50 p-4 rounded-lg">
+                    <div class="text-2xl font-bold text-orange-600">${uniqueCities}</div>
+                    <div class="text-sm text-gray-600">Cities</div>
+                </div>
+            `;
+        }
+
+        // Display interest categories
+        function displayInterestCategories(events) {
+            const categoriesContainer = document.getElementById('interestCategories');
+            
+            // Group events by category
+            const categoryGroups = {};
+            events.forEach(event => {
+                if (!categoryGroups[event.category]) {
+                    categoryGroups[event.category] = [];
+                }
+                categoryGroups[event.category].push(event);
+            });
+            
+            // Create category cards
+            categoriesContainer.innerHTML = Object.keys(categoryGroups).map(category => `
+                <div class="bg-gradient-to-br from-blue-50 to-purple-50 p-4 rounded-lg border border-gray-200">
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="font-semibold text-gray-800">${category}</h4>
+                        <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">${categoryGroups[category].length}</span>
+                    </div>
+                    <p class="text-sm text-gray-600">${categoryGroups[category].length} events in this category</p>
+                </div>
+            `).join('');
+        }
+
+        // Display events list
+        function displayEventsList(events) {
+            const eventsContainer = document.getElementById('eventsList');
+            
+            eventsContainer.innerHTML = events.map(event => `
+                <div class="event-card bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+                    <div class="flex justify-between items-start mb-3">
+                        <h4 class="font-semibold text-gray-800 text-lg">${event.title}</h4>
+                        <div class="flex items-center space-x-2">
+                            ${event.source !== 'Sample' ? `<span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">${event.source}</span>` : ''}
+                            <div class="bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-sm px-3 py-1 rounded-full">
                                 ${event.rating.toFixed(1)} ⭐
                             </div>
                         </div>
-                        <p class="text-sm text-gray-600 mb-2">${event.description}</p>
-                        <div class="flex items-center justify-between text-xs text-gray-500 mb-2">
-                            <div class="flex items-center space-x-2">
-                                <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded">${event.category}</span>
-                                <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded">${event.city}</span>
-                                <span class="flex items-center">
-                                    ${event.indoor_outdoor === 'indoor' ? '🏠' : '🌳'}
-                                    ${event.indoor_outdoor}
-                                </span>
-                            </div>
-                            <div class="text-right">
-                                <div>${formatDateTime(event.start_time)}</div>
-                                <div>to ${formatDateTime(event.end_time)}</div>
-                            </div>
+                    </div>
+                    <p class="text-gray-600 mb-3">${event.description}</p>
+                    <div class="flex items-center justify-between text-sm text-gray-500 mb-3">
+                        <div class="flex items-center space-x-3">
+                            <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full">${event.category}</span>
+                            <span class="bg-gray-100 text-gray-800 px-3 py-1 rounded-full">${event.city}</span>
+                            <span class="flex items-center">
+                                ${event.indoor_outdoor === 'indoor' ? '🏠' : '🌳'}
+                                ${event.indoor_outdoor}
+                            </span>
                         </div>
-                        <div class="mt-2 text-xs text-gray-400">
-                            <div class="flex justify-between">
-                                <span>${event.ratingCount} reviews</span>
-                                <span>Event ID: ${event.id}</span>
-                            </div>
-                        </div>
-                        <div class="mt-3 flex space-x-2">
-                            <button onclick="showEventDetails(${event.id})" class="bg-blue-500 text-white text-xs px-3 py-1 rounded hover:bg-blue-600">
-                                View Details
-                            </button>
-                            <button onclick="showEventReviews(${event.id})" class="bg-green-500 text-white text-xs px-3 py-1 rounded hover:bg-green-600">
-                                Reviews (${event.reviews ? event.reviews.length : 0})
-                            </button>
+                        <div class="text-right">
+                            <div>${formatDateTime(event.start_time)}</div>
+                            <div>to ${formatDateTime(event.end_time)}</div>
                         </div>
                     </div>
-                `).join('');
+                    <div class="mt-3 text-sm text-gray-400">
+                        <div class="flex justify-between">
+                            <span>${event.ratingCount} reviews</span>
+                            <span>${event.country}</span>
+                        </div>
+                    </div>
+                    <div class="mt-4 flex space-x-3">
+                        <button onclick="showEventDetails(${event.id})" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors">
+                            View Details
+                        </button>
+                        <button onclick="showRatingModal(${event.id})" class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors">
+                            Rate Event
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Display map with event markers
+        function displayMap(events, destination) {
+            // Clear existing map
+            if (map) {
+                map.remove();
             }
             
-            // Display interest categories
-            const interestCategories = document.getElementById('interestCategories');
-            if (interestCategories) {
-                const categories = [...new Set(events.map(event => event.category))];
-                interestCategories.innerHTML = categories.map(category => `
-                    <div class="interest-category bg-gradient-to-br from-blue-50 to-purple-50 p-4 rounded-lg border border-gray-200">
-                        <div class="flex items-center justify-between mb-2">
-                            <h4 class="font-semibold text-gray-800">${category}</h4>
-                            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">${events.filter(e => e.category === category).length}</span>
+            // Clear existing markers
+            markers.forEach(marker => marker.remove());
+            markers = [];
+            
+            if (events.length === 0) return;
+
+            // Initialize map
+            map = L.map('map');
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            const group = new L.featureGroup();
+            
+            events.forEach(event => {
+                const marker = L.marker([event.lat, event.lon])
+                    .bindPopup(`
+                        <div class="p-3">
+                            <h4 class="font-semibold text-gray-800">${event.title}</h4>
+                            <p class="text-sm text-gray-600">${event.category}</p>
+                            <p class="text-xs text-gray-500">${event.city}, ${event.country}</p>
+                            <p class="text-xs text-gray-500">${formatDateTime(event.start_time)}</p>
+                            <div class="mt-2">
+                                <span class="bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs px-2 py-1 rounded-full">
+                                    ${event.rating.toFixed(1)} ⭐
+                                </span>
+                            </div>
                         </div>
-                        <p class="text-sm text-gray-600">${events.filter(e => e.category === category).length} events in this category</p>
-                    </div>
-                `).join('');
+                    `);
+                markers.push(marker);
+                group.addLayer(marker);
+            });
+
+            // Add markers to map
+            markers.forEach(marker => marker.addTo(map));
+            
+            // Fit map to show all markers
+            if (markers.length > 0) {
+                map.fitBounds(group.getBounds().pad(0.1));
             }
         }
-        
-        // Global events storage
-        let currentEvents = [];
-        
-        // Load stored ratings and reviews from localStorage
-        function loadStoredReviews() {
-            try {
-                const stored = localStorage.getItem('eventReviews');
-                return stored ? JSON.parse(stored) : {};
-            } catch (error) {
-                console.error('Error loading stored reviews:', error);
-                return {};
-            }
-        }
-        
-        // Save ratings and reviews to localStorage
-        function saveStoredReviews(reviews) {
-            try {
-                localStorage.setItem('eventReviews', JSON.stringify(reviews));
-                console.log('Reviews saved to localStorage');
-            } catch (error) {
-                console.error('Error saving reviews:', error);
-            }
-        }
-        
-        // Get stored reviews for an event
-        function getStoredReviewsForEvent(eventId) {
-            const storedReviews = loadStoredReviews();
-            return storedReviews[eventId] || [];
-        }
-        
-        // Add review to stored reviews
-        function addStoredReview(eventId, review) {
-            const storedReviews = loadStoredReviews();
-            if (!storedReviews[eventId]) {
-                storedReviews[eventId] = [];
-            }
-            storedReviews[eventId].push(review);
-            saveStoredReviews(storedReviews);
-        }
-        
+
         // Format date and time for display
         function formatDateTime(dateTimeString) {
             const date = new Date(dateTimeString);
             return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
         }
-        
-        // Show event details with rating functionality
+
+        // Show event details
         function showEventDetails(eventId) {
-            const event = currentEvents.find(e => e.id === eventId);
-            if (!event) {
-                alert('Event not found');
-                return;
-            }
-            
-            // Create popup overlay
-            const popupOverlay = document.createElement('div');
-            popupOverlay.className = 'popup-overlay';
-            popupOverlay.onclick = () => popupOverlay.remove();
-            
-            // Create popup content
-            const popupContent = document.createElement('div');
-            popupContent.className = 'popup-content';
-            popupContent.onclick = (e) => e.stopPropagation();
-            
-            popupContent.innerHTML = `
+            const event = eventsData.find(e => e.id === eventId);
+            if (!event) return;
+
+            alert(`Event Details:\n\n${event.title}\n\n${event.description}\n\nCategory: ${event.category}\nLocation: ${event.city}, ${event.country}\nTime: ${formatDateTime(event.start_time)} - ${formatDateTime(event.end_time)}\nRating: ${event.rating.toFixed(1)} ⭐ (${event.ratingCount} reviews)`);
+        }
+
+        // Show rating modal with star rating
+        function showRatingModal(eventId) {
+            const event = eventsData.find(e => e.id === eventId);
+            if (!event) return;
+
+            // Create modal overlay
+            const modalOverlay = document.createElement('div');
+            modalOverlay.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            modalOverlay.onclick = () => modalOverlay.remove();
+
+            // Create modal content
+            const modalContent = document.createElement('div');
+            modalContent.className = 'bg-white rounded-lg p-6 max-w-md w-full mx-4';
+            modalContent.onclick = (e) => e.stopPropagation();
+
+            modalContent.innerHTML = `
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-semibold text-gray-800">${event.title}</h3>
-                    <button onclick="this.closest('.popup-overlay').remove()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+                    <h3 class="text-xl font-semibold text-gray-800">Rate Event</h3>
+                    <button onclick="this.closest('.fixed').remove()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
                 </div>
                 
                 <div class="mb-4">
-                    <p class="text-gray-600 mb-2">${event.description}</p>
-                    <div class="flex items-center space-x-2 mb-2">
-                        <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">${event.category}</span>
-                        <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-sm">${event.city}</span>
+                    <h4 class="font-semibold text-gray-800 mb-2">${event.title}</h4>
+                    <p class="text-sm text-gray-600">${event.city}, ${event.country}</p>
+                </div>
+                
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Your Rating:</label>
+                    <div class="star-rating flex space-x-1" id="starRating">
+                        <span class="star text-3xl cursor-pointer" data-rating="1">☆</span>
+                        <span class="star text-3xl cursor-pointer" data-rating="2">☆</span>
+                        <span class="star text-3xl cursor-pointer" data-rating="3">☆</span>
+                        <span class="star text-3xl cursor-pointer" data-rating="4">☆</span>
+                        <span class="star text-3xl cursor-pointer" data-rating="5">☆</span>
                     </div>
-                    <div class="text-sm text-gray-500">
-                        <div>Start: ${formatDateTime(event.start_time)}</div>
-                        <div>End: ${formatDateTime(event.end_time)}</div>
-                    </div>
+                    <p class="text-sm text-gray-500 mt-2" id="ratingText">Click a star to rate</p>
                 </div>
                 
                 <div class="mb-4">
-                    <h4 class="font-semibold mb-2">Rate this event:</h4>
-                    <div class="star-rating" id="ratingStars">
-                        <span class="star" data-rating="1">★</span>
-                        <span class="star" data-rating="2">★</span>
-                        <span class="star" data-rating="3">★</span>
-                        <span class="star" data-rating="4">★</span>
-                        <span class="star" data-rating="5">★</span>
-                    </div>
+                    <label for="reviewText" class="block text-sm font-medium text-gray-700 mb-2">Your Review (Optional):</label>
+                    <textarea id="reviewText" class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent" rows="3" placeholder="Share your experience..."></textarea>
                 </div>
                 
                 <div class="mb-4">
-                    <h4 class="font-semibold mb-2">Write a review:</h4>
-                    <textarea id="reviewText" class="w-full p-2 border border-gray-300 rounded-md" rows="3" placeholder="Share your experience..."></textarea>
-                    <input type="text" id="userName" class="w-full p-2 border border-gray-300 rounded-md mt-2" placeholder="Your name (optional)" value="Anonymous">
+                    <label for="userName" class="block text-sm font-medium text-gray-700 mb-2">Your Name:</label>
+                    <input type="text" id="userName" class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Your name" value="Anonymous">
                 </div>
                 
-                <div class="flex space-x-2">
-                    <button onclick="submitRating(${eventId})" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-                        Submit Rating & Review
+                <div class="flex space-x-3">
+                    <button onclick="submitRating(${eventId})" class="flex-1 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition-colors">
+                        Submit Rating
                     </button>
-                    <button onclick="showEventReviews(${eventId})" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
-                        View Reviews
+                    <button onclick="this.closest('.fixed').remove()" class="flex-1 bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600 transition-colors">
+                        Cancel
                     </button>
                 </div>
             `;
-            
-            popupOverlay.appendChild(popupContent);
-            document.body.appendChild(popupOverlay);
-            
+
+            modalOverlay.appendChild(modalContent);
+            document.body.appendChild(modalOverlay);
+
             // Add star rating functionality
-            const stars = popupContent.querySelectorAll('.star');
+            const stars = modalContent.querySelectorAll('.star');
+            const ratingText = modalContent.querySelector('#ratingText');
             let selectedRating = 0;
-            
+
             stars.forEach((star, index) => {
                 star.addEventListener('click', () => {
                     selectedRating = index + 1;
-                    stars.forEach((s, i) => {
-                        s.classList.toggle('active', i < selectedRating);
-                    });
+                    updateStarDisplay(stars, selectedRating);
+                    updateRatingText(ratingText, selectedRating);
                 });
-                
+
                 star.addEventListener('mouseenter', () => {
-                    stars.forEach((s, i) => {
-                        s.classList.toggle('active', i <= index);
-                    });
+                    updateStarDisplay(stars, index + 1);
                 });
             });
-            
-            popupContent.addEventListener('mouseleave', () => {
-                stars.forEach((s, i) => {
-                    s.classList.toggle('active', i < selectedRating);
-                });
+
+            modalContent.addEventListener('mouseleave', () => {
+                updateStarDisplay(stars, selectedRating);
+            });
+
+            // Store selected rating for submission
+            window.currentRating = selectedRating;
+        }
+
+        // Update star display
+        function updateStarDisplay(stars, rating) {
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.textContent = '★';
+                    star.style.color = '#fbbf24';
+                } else {
+                    star.textContent = '☆';
+                    star.style.color = '#d1d5db';
+                }
             });
         }
-        
-        // Submit rating and review
+
+        // Update rating text
+        function updateRatingText(ratingText, rating) {
+            const ratingTexts = {
+                0: 'Click a star to rate',
+                1: 'Poor',
+                2: 'Fair',
+                3: 'Good',
+                4: 'Very Good',
+                5: 'Excellent'
+            };
+            ratingText.textContent = ratingTexts[rating];
+        }
+
+        // Submit rating
         function submitRating(eventId) {
-            const stars = document.querySelectorAll('.star');
-            const selectedRating = Array.from(stars).filter(s => s.classList.contains('active')).length;
+            const event = eventsData.find(e => e.id === eventId);
+            if (!event) return;
+
+            const selectedRating = window.currentRating || 0;
             const reviewText = document.getElementById('reviewText').value;
             const userName = document.getElementById('userName').value || 'Anonymous';
-            
+
             if (selectedRating === 0) {
-                alert('Please select a rating');
+                alert('Please select a rating by clicking on the stars');
                 return;
             }
+
+            // Update event rating (simplified - in real app, this would go to backend)
+            const newRatingCount = event.ratingCount + 1;
+            const newAverageRating = ((event.rating * event.ratingCount) + selectedRating) / newRatingCount;
             
-            // Create the review object
-            const newReview = {
-                user_name: userName,
-                rating: selectedRating,
-                review_text: reviewText.trim(),
-                date: new Date().toLocaleDateString()
-            };
+            event.rating = newAverageRating;
+            event.ratingCount = newRatingCount;
+
+            // Show success message
+            alert(`Thank you for rating "${event.title}" ${selectedRating} star${selectedRating > 1 ? 's' : ''}!\n\nYour review has been submitted.`);
+
+            // Close modal
+            document.querySelector('.fixed').remove();
+
+            // Refresh the display to show updated rating
+            const country = document.getElementById('country').value;
+            const city = document.getElementById('city').value;
+            const season = document.getElementById('season').value;
+            const duration = document.getElementById('duration').value;
             
-            // Save to localStorage
-            addStoredReview(eventId, newReview);
-            
-            // Find the event and add the review
-            const event = currentEvents.find(e => e.id === eventId);
-            if (event) {
-                event.reviews.push(newReview);
-                
-                // Update rating
-                const totalRating = event.reviews.reduce((sum, review) => sum + review.rating, 0);
-                event.rating = totalRating / event.reviews.length;
-                event.ratingCount = event.reviews.length;
-                
-                console.log(`Added review for ${event.title}: ${selectedRating} stars by ${userName}`);
-            }
-            
-            alert('Thank you for your rating and review! It has been saved.');
-            
-            // Close popup
-            document.querySelector('.popup-overlay').remove();
-            
-            // Refresh the display
-            displayInlineResults(currentEvents, 'All Cities', 'Country', 'Season');
-        }
-        
-        // Show event reviews
-        function showEventReviews(eventId) {
-            const event = currentEvents.find(e => e.id === eventId);
-            if (!event) {
-                alert('Event not found');
-                return;
-            }
-            
-            // Create popup overlay
-            const popupOverlay = document.createElement('div');
-            popupOverlay.className = 'popup-overlay';
-            popupOverlay.onclick = () => popupOverlay.remove();
-            
-            // Create popup content
-            const popupContent = document.createElement('div');
-            popupContent.className = 'popup-content';
-            popupContent.onclick = (e) => e.stopPropagation();
-            
-            const reviews = event.reviews || [];
-            
-            popupContent.innerHTML = `
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-semibold text-gray-800">Reviews for ${event.title}</h3>
-                    <button onclick="this.closest('.popup-overlay').remove()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
-                </div>
-                
-                <div class="mb-4">
-                    <div class="text-center">
-                        <div class="text-3xl font-bold text-yellow-500">${event.rating.toFixed(1)} ⭐</div>
-                        <div class="text-sm text-gray-500">Based on ${event.ratingCount} reviews</div>
-                    </div>
-                </div>
-                
-                <div class="space-y-3 max-h-96 overflow-y-auto">
-                    ${reviews.length === 0 ? 
-                        '<p class="text-gray-500 text-center py-4">No reviews yet. Be the first to review!</p>' :
-                        reviews.map(review => `
-                            <div class="review-card bg-gray-50 p-3 rounded-lg">
-                                <div class="flex justify-between items-start mb-2">
-                                    <div class="font-semibold text-sm">${review.user_name}</div>
-                                    <div class="text-yellow-500 text-sm">${'★'.repeat(review.rating)}${'☆'.repeat(5-review.rating)}</div>
-                                </div>
-                                <p class="text-sm text-gray-600 mb-1">${review.review_text}</p>
-                                <div class="text-xs text-gray-400">${review.date}</div>
-                            </div>
-                        `).join('')
-                    }
-                </div>
-            `;
-            
-            popupOverlay.appendChild(popupContent);
-            document.body.appendChild(popupOverlay);
-        }
-        
-        // Display map with event markers
-        function displayMap(events, destination) {
-            // Store events globally for other functions
-            currentEvents = events;
-            
-            console.log('=== MAP DEBUG START ===');
-            console.log('Displaying map with events:', events.length);
-            console.log('Events data:', events);
-            
-            // Clear existing map
-            const mapElement = document.getElementById('map');
-            if (!mapElement) {
-                console.error('❌ Map element not found');
-                return;
-            }
-            
-            console.log('✅ Map element found, dimensions:', mapElement.offsetWidth, 'x', mapElement.offsetHeight);
-            
-            // Always create the visual map first - this will definitely work
-            createVisualMap(events, mapElement);
-            
-            // Then try to enhance with Leaflet if available
-            setTimeout(() => {
-                try {
-                    if (typeof L !== 'undefined' && L.map && L.marker && L.tileLayer) {
-                        console.log('✅ Leaflet library available, enhancing with interactive map');
-                        enhanceWithLeafletMap(events, mapElement);
-                    } else {
-                        console.log('ℹ️ Leaflet not available, using visual map only');
-                    }
-                } catch (error) {
-                    console.error('❌ Error enhancing with Leaflet:', error);
-                }
-            }, 500);
-            
-            console.log('=== MAP DEBUG END ===');
-        }
-        
-        function createVisualMap(events, mapElement) {
-            console.log('Creating visual map with', events.length, 'events');
-            
-            // Ensure map element is visible and has proper dimensions
-            mapElement.style.minHeight = '500px';
-            mapElement.style.width = '100%';
-            mapElement.style.display = 'block';
-            mapElement.style.backgroundColor = '#f8fafc';
-            mapElement.style.border = '2px solid #e2e8f0';
-            mapElement.style.borderRadius = '12px';
-            mapElement.style.padding = '20px';
-            mapElement.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
-            
-            if (events && events.length > 0) {
-                // Group events by city
-                const eventsByCity = {};
-                events.forEach(event => {
-                    if (!eventsByCity[event.city]) {
-                        eventsByCity[event.city] = [];
-                    }
-                    eventsByCity[event.city].push(event);
-                });
-                
-                const cities = Object.keys(eventsByCity);
-                console.log('Events grouped by cities:', cities);
-                
-                // Create a simple map header and summary only
-                let mapHTML = `
-                    <div class="w-full">
-                        <div class="text-center mb-6">
-                            <h3 class="text-2xl font-bold text-gray-800 mb-2">🗺️ Event Locations Map</h3>
-                            <p class="text-gray-600">Showing ${events.length} events across ${cities.length} cities</p>
-                        </div>
-                        
-                        <div class="mt-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4">
-                            <h4 class="font-semibold text-gray-800 mb-2">📊 Location Summary</h4>
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                                <div class="text-center">
-                                    <div class="text-2xl font-bold text-blue-600">${events.length}</div>
-                                    <div class="text-gray-600">Total Events</div>
-                                </div>
-                                <div class="text-center">
-                                    <div class="text-2xl font-bold text-green-600">${cities.length}</div>
-                                    <div class="text-gray-600">Cities</div>
-                                </div>
-                                <div class="text-center">
-                                    <div class="text-2xl font-bold text-purple-600">${(events.reduce((sum, event) => sum + event.rating, 0) / events.length).toFixed(1)}</div>
-                                    <div class="text-gray-600">Avg Rating</div>
-                                </div>
-                                <div class="text-center">
-                                    <div class="text-2xl font-bold text-orange-600">${[...new Set(events.map(e => e.category))].length}</div>
-                                    <div class="text-gray-600">Categories</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="mt-6 text-center">
-                            <p class="text-gray-600 text-sm">Interactive map will appear below if Leaflet library loads successfully</p>
-                        </div>
-                    </div>
-                `;
-                
-                mapElement.innerHTML = mapHTML;
-                console.log('✅ Visual map created successfully (cards removed)');
-            } else {
-                mapElement.innerHTML = `
-                    <div class="text-center py-12">
-                        <div class="text-6xl mb-4">🗺️</div>
-                        <h3 class="text-xl font-semibold text-gray-800 mb-2">No Events to Display</h3>
-                        <p class="text-gray-600">No events found for the selected criteria.</p>
-                    </div>
-                `;
+            if (country && season && duration) {
+                const filteredEvents = getFilteredEvents(country, city, season, duration);
+                displayResults(filteredEvents, city || 'All Cities', country, season);
             }
         }
-        
-        function enhanceWithLeafletMap(events, mapElement) {
-            console.log('Enhancing with Leaflet map...');
-            
-            // Clear existing Leaflet map
-            if (window.leafletMap) {
-                window.leafletMap.remove();
-                window.leafletMap = null;
-            }
-            
-            // Create a new container for the Leaflet map
-            const leafletContainer = document.createElement('div');
-            leafletContainer.id = 'leaflet-map-container';
-            leafletContainer.style.height = '400px';
-            leafletContainer.style.width = '100%';
-            leafletContainer.style.marginTop = '20px';
-            leafletContainer.style.borderRadius = '8px';
-            leafletContainer.style.overflow = 'hidden';
-            
-            // Add the container to the map element
-            mapElement.appendChild(leafletContainer);
-            
-            try {
-                // Create Leaflet map
-                window.leafletMap = L.map('leaflet-map-container', {
-                    preferCanvas: true,
-                    zoomControl: true
-                });
-                
-                // Add tiles
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap contributors',
-                    maxZoom: 19
-                }).addTo(window.leafletMap);
-                
-                // Add markers
-                const group = new L.featureGroup();
-                let validMarkers = 0;
-                
-                events.forEach(event => {
-                    if (event.lat && event.lon && event.lat !== 0 && event.lon !== 0) {
-                        const marker = L.marker([event.lat, event.lon])
-                            .bindPopup(`
-                                <div class="p-2">
-                                    <h4 class="font-semibold">${event.title}</h4>
-                                    <p class="text-sm text-gray-600">${event.category}</p>
-                                    <p class="text-xs text-gray-500">${event.city}</p>
-                                    <div class="mt-1">
-                                        <span class="rating-badge text-white text-xs px-2 py-1 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500">
-                                            ${event.rating.toFixed(1)} ⭐
-                                        </span>
-                                    </div>
-                                </div>
-                            `);
-                        group.addLayer(marker);
-                        validMarkers++;
-                    }
-                });
-                
-                if (validMarkers > 0) {
-                    group.eachLayer(marker => marker.addTo(window.leafletMap));
-                    const bounds = group.getBounds();
-                    window.leafletMap.fitBounds(bounds.pad(0.1));
-                    console.log('✅ Leaflet map enhanced successfully with', validMarkers, 'markers');
-                } else {
-                    window.leafletMap.setView([0, 0], 2);
-                    console.log('✅ Leaflet map created with default view');
-                }
-                
-                // Force map to invalidate size
-                setTimeout(() => {
-                    if (window.leafletMap) {
-                        window.leafletMap.invalidateSize();
-                    }
-                }, 100);
-                
-            } catch (error) {
-                console.error('❌ Error enhancing with Leaflet:', error);
-                // Remove the container if Leaflet fails
-                if (leafletContainer.parentNode) {
-                    leafletContainer.parentNode.removeChild(leafletContainer);
-                }
-            }
-        }
-        
     </script>
 </body>
 </html>

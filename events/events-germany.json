@@ -1,0 +1,57 @@
+{
+  "country": "Germany",
+  "cities": {
+    "Berlin": [
+      {
+        "id": "germany_berlin_1",
+        "title": "Berlin Wall Memorial Tour",
+        "description": "Visit the Berlin Wall Memorial and learn about Germany's divided history. Expert guide included.",
+        "category": "History & Heritage",
+        "start_time": "2024-03-19T10:00:00Z",
+        "end_time": "2024-03-19T13:00:00Z",
+        "lat": 52.5075,
+        "lon": 13.3903,
+        "city": "Berlin",
+        "country": "Germany",
+        "indoor_outdoor": "outdoor",
+        "rating": 4.8,
+        "ratingCount": 1245,
+        "source": "Local Events"
+      },
+      {
+        "id": "germany_berlin_2",
+        "title": "Brandenburg Gate Photo Tour",
+        "description": "Capture stunning photos at Brandenburg Gate and nearby landmarks. Professional photography tips included.",
+        "category": "Art & Culture",
+        "start_time": "2024-03-22T16:00:00Z",
+        "end_time": "2024-03-22T18:00:00Z",
+        "lat": 52.5163,
+        "lon": 13.3777,
+        "city": "Berlin",
+        "country": "Germany",
+        "indoor_outdoor": "outdoor",
+        "rating": 4.5,
+        "ratingCount": 432,
+        "source": "Local Events"
+      }
+    ],
+    "Munich": [
+      {
+        "id": "germany_munich_1",
+        "title": "Oktoberfest Experience",
+        "description": "Experience traditional Bavarian culture with beer, food, and music. Authentic Oktoberfest atmosphere.",
+        "category": "Food & Drink",
+        "start_time": "2024-03-26T18:00:00Z",
+        "end_time": "2024-03-26T22:00:00Z",
+        "lat": 48.1351,
+        "lon": 11.5820,
+        "city": "Munich",
+        "country": "Germany",
+        "indoor_outdoor": "indoor",
+        "rating": 4.7,
+        "ratingCount": 743,
+        "source": "Local Events"
+      }
+    ]
+  }
+}

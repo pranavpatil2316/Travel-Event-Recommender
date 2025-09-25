@@ -1,0 +1,107 @@
+{
+  "country": "France",
+  "cities": {
+    "Paris": [
+      {
+        "id": "france_paris_1",
+        "title": "Eiffel Tower Visit",
+        "description": "Climb the iconic Eiffel Tower for panoramic views of Paris. Skip the line with our guided tour.",
+        "category": "Sightseeing",
+        "start_time": "2024-03-23T10:00:00Z",
+        "end_time": "2024-03-23T12:00:00Z",
+        "lat": 48.8584,
+        "lon": 2.2945,
+        "city": "Paris",
+        "country": "France",
+        "indoor_outdoor": "outdoor",
+        "rating": 4.9,
+        "ratingCount": 2156,
+        "source": "Local Events"
+      },
+      {
+        "id": "france_paris_2",
+        "title": "Louvre Museum Art Tour",
+        "description": "Discover masterpieces including the Mona Lisa at the world's largest art museum. Expert guide included.",
+        "category": "Art & Culture",
+        "start_time": "2024-03-25T14:00:00Z",
+        "end_time": "2024-03-25T17:00:00Z",
+        "lat": 48.8606,
+        "lon": 2.3376,
+        "city": "Paris",
+        "country": "France",
+        "indoor_outdoor": "indoor",
+        "rating": 4.8,
+        "ratingCount": 1890,
+        "source": "Local Events"
+      },
+      {
+        "id": "france_paris_3",
+        "title": "Seine River Dinner Cruise",
+        "description": "Enjoy a romantic dinner cruise along the Seine River with stunning views of Paris landmarks.",
+        "category": "Food & Drink",
+        "start_time": "2024-03-27T19:00:00Z",
+        "end_time": "2024-03-27T22:00:00Z",
+        "lat": 48.8566,
+        "lon": 2.3522,
+        "city": "Paris",
+        "country": "France",
+        "indoor_outdoor": "indoor",
+        "rating": 4.7,
+        "ratingCount": 743,
+        "source": "Local Events"
+      }
+    ],
+    "Lyon": [
+      {
+        "id": "france_lyon_1",
+        "title": "Old Lyon Walking Tour",
+        "description": "Explore the historic traboules and Renaissance architecture of Old Lyon. UNESCO World Heritage site.",
+        "category": "History & Heritage",
+        "start_time": "2024-03-24T10:00:00Z",
+        "end_time": "2024-03-24T13:00:00Z",
+        "lat": 45.7640,
+        "lon": 4.8357,
+        "city": "Lyon",
+        "country": "France",
+        "indoor_outdoor": "outdoor",
+        "rating": 4.5,
+        "ratingCount": 432,
+        "source": "Local Events"
+      },
+      {
+        "id": "france_lyon_2",
+        "title": "Lyon Food Market Tour",
+        "description": "Taste authentic Lyonnaise cuisine at local markets. Sample traditional dishes and local specialties.",
+        "category": "Food & Drink",
+        "start_time": "2024-03-26T09:00:00Z",
+        "end_time": "2024-03-26T12:00:00Z",
+        "lat": 45.7578,
+        "lon": 4.8320,
+        "city": "Lyon",
+        "country": "France",
+        "indoor_outdoor": "outdoor",
+        "rating": 4.6,
+        "ratingCount": 298,
+        "source": "Local Events"
+      }
+    ],
+    "Nice": [
+      {
+        "id": "france_nice_1",
+        "title": "Promenade des Anglais Walk",
+        "description": "Stroll along the famous Promenade des Anglais with beautiful Mediterranean views. Perfect for sunset walks.",
+        "category": "Sightseeing",
+        "start_time": "2024-03-28T17:00:00Z",
+        "end_time": "2024-03-28T19:00:00Z",
+        "lat": 43.6959,
+        "lon": 7.2644,
+        "city": "Nice",
+        "country": "France",
+        "indoor_outdoor": "outdoor",
+        "rating": 4.4,
+        "ratingCount": 567,
+        "source": "Local Events"
+      }
+    ]
+  }
+}
