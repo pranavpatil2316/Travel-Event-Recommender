@@ -12,7 +12,7 @@ A modern, responsive web application that combines travel planning with event di
 ## ✨ **Features**
 
 ### 🌍 **Country-First Destination Selection**
-- Select from 15+ countries worldwide
+- Select from 19 countries worldwide with comprehensive event data
 - Dynamic city loading using REST Countries API
 - Optional city selection (leave empty to see all country events)
 - Fallback to predefined cities if API fails
@@ -42,8 +42,9 @@ A modern, responsive web application that combines travel planning with event di
 ### 📊 **Comprehensive Event Data**
 - Multiple event categories (Art & Culture, History & Heritage, etc.)
 - Detailed event descriptions and information
-- Live event integration (simulated API)
-- Fallback event generation for any city
+- Pre-loaded event data for 19 countries with 1000+ events
+- Real coordinates and location data for accurate mapping
+- Event ratings and review counts for better recommendations
 
 ## 🛠️ **Technology Stack**
 
@@ -52,22 +53,35 @@ A modern, responsive web application that combines travel planning with event di
 - **Maps**: LeafletJS with OpenStreetMap tiles
 - **Storage**: IndexedDB for client-side data persistence
 - **APIs**: REST Countries API, Nominatim (OpenStreetMap)
+- **Data**: JSON files with comprehensive event data for 19 countries
+- **Deployment**: Netlify-ready with CLI support
 
 ## 📁 **File Structure**
 
 ```
 travel-event-recommender-website/
-├── index.html              # Main HTML file
-├── script.js               # Main JavaScript logic
-├── database.js             # IndexedDB management
-├── sample_events.json      # Sample event data
-├── sample_reviews.js       # Sample reviews and ratings
-├── package.json            # Project metadata
+├── index.html              # Main HTML file with embedded JavaScript
+├── package.json            # Project metadata and dependencies
 ├── README.md               # This file
-├── DEPLOYMENT.md           # Deployment instructions
-├── test_simple.html        # Simple form test
-├── test_minimal.html       # Minimal functionality test
-└── script_minimal.js       # Minimal script for testing
+└── events/                 # Event data directory
+    ├── events-argentina.json
+    ├── events-australia.json
+    ├── events-brazil.json
+    ├── events-canada.json
+    ├── events-china.json
+    ├── events-egypt.json
+    ├── events-france.json
+    ├── events-germany.json
+    ├── events-india.json
+    ├── events-italy.json
+    ├── events-japan.json
+    ├── events-mexico.json
+    ├── events-russia.json
+    ├── events-southafrica.json
+    ├── events-spain.json
+    ├── events-turkey.json
+    ├── events-uk.json
+    └── events-usa.json
 ```
 
 ## 🚨 **Troubleshooting**
@@ -93,7 +107,7 @@ travel-event-recommender-website/
 **Symptoms**: No events show after form submission
 **Solutions**:
 1. **Check Console**: Look for JavaScript errors
-2. **Verify JSON File**: Ensure `sample_events.json` exists
+2. **Verify Event Files**: Ensure event JSON files exist in the `events/` directory
 3. **Try Different Country**: Some countries may have no events
 4. **Check Form**: Ensure all required fields are filled
 
@@ -107,15 +121,10 @@ travel-event-recommender-website/
 
 ## 🔧 **Development & Testing**
 
-### **Test Files**
-- `test_simple.html`: Basic form functionality test
-- `test_minimal.html`: Minimal version without complex features
-- `script_minimal.js`: Simplified JavaScript for debugging
-
 ### **Debugging Steps**
 1. **Open Browser Console** (F12 → Console)
 2. **Check for Errors**: Red error messages indicate problems
-3. **Test Minimal Version**: Use `test_minimal.html` to isolate issues
+3. **Verify Event Files**: Ensure all JSON files exist in the `events/` directory
 4. **Verify Network**: Check Network tab for failed requests
 5. **Clear Storage**: Clear IndexedDB and localStorage if needed
 
@@ -188,14 +197,14 @@ travel-event-recommender-website/
 
 ### **Getting Help**
 1. **Check Console**: Always check browser console first
-2. **Test Minimal**: Try `test_minimal.html` for basic functionality
+2. **Verify Files**: Ensure all event JSON files are present in the `events/` directory
 3. **Clear Cache**: Clear browser cache and try again
-4. **Check Files**: Ensure all files are present and accessible
+4. **Check Internet**: Ensure internet connection for API calls
 
 ### **Common Issues**
 - **Page refreshes**: Check console for JavaScript errors
 - **Cities not loading**: Check internet connection and API status
-- **Events not showing**: Verify `sample_events.json` exists
+- **Events not showing**: Verify event JSON files exist in `events/` directory
 - **Ratings not saving**: Check IndexedDB support in browser
 
 ## 📄 **License**
