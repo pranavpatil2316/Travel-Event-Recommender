@@ -27,6 +27,7 @@ const countryCities = {
 // Global variables
 let map;
 let markers = [];
+let selectedCategories = []; // Track selected categories
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
@@ -343,15 +344,36 @@ function displayInterestCategories(events) {
     });
     
     // Create category cards
-    categoriesContainer.innerHTML = Object.keys(categoryGroups).map(category => `
-        <div class="bg-gradient-to-br from-blue-50 to-purple-50 p-4 rounded-lg border border-gray-200">
-            <div class="flex items-center justify-between mb-2">
-                <h4 class="font-semibold text-gray-800">${category}</h4>
-                <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">${categoryGroups[category].length}</span>
+    categoriesContainer.innerHTML = Object.keys(categoryGroups).map(category => {
+        const isSelected = selectedCategories.includes(category);
+        return `
+            <div class="category-card p-4 rounded-lg border-2 cursor-pointer hover:shadow-md transition-all duration-200 hover:scale-105 ${isSelected ? 'bg-gradient-to-br from-green-50 to-blue-50 border-green-400' : 'bg-gradient-to-br from-blue-50 to-purple-50 border-gray-200'}" onclick="toggleCategory('${category}')">
+                <div class="flex items-center justify-between mb-2">
+                    <h4 class="font-semibold text-gray-800">${category}</h4>
+                    <div class="flex items-center space-x-2">
+                        <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">${categoryGroups[category].length}</span>
+                        ${isSelected ? '<span class="text-green-600 text-lg">✓</span>' : ''}
+                    </div>
+                </div>
+                <p class="text-sm text-gray-600">${categoryGroups[category].length} events in this category</p>
+                <div class="mt-2 text-xs font-medium ${isSelected ? 'text-green-600' : 'text-blue-600'}">
+                    ${isSelected ? 'Selected - Click to deselect' : 'Click to select'}
+                </div>
             </div>
-            <p class="text-sm text-gray-600">${categoryGroups[category].length} events in this category</p>
-        </div>
-    `).join('');
+        `;
+    }).join('');
+    
+    // Add clear selection button if categories are selected
+    if (selectedCategories.length > 0) {
+        const clearButton = document.createElement('div');
+        clearButton.className = 'mt-4 text-center';
+        clearButton.innerHTML = `
+            <button onclick="clearCategorySelection()" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition-colors">
+                Clear All Selections (${selectedCategories.length} selected)
+            </button>
+        `;
+        categoriesContainer.appendChild(clearButton);
+    }
 }
 
 // Display events list
@@ -782,10 +804,192 @@ function submitRating(eventId) {
     }
 }
 
+// Toggle category selection
+function toggleCategory(category) {
+    console.log('Toggling category:', category);
+    
+    if (selectedCategories.includes(category)) {
+        // Remove from selection
+        selectedCategories = selectedCategories.filter(cat => cat !== category);
+    } else {
+        // Add to selection
+        selectedCategories.push(category);
+    }
+    
+    console.log('Selected categories:', selectedCategories);
+    
+    // Get current form data
+    const country = document.getElementById('country').value;
+    const city = document.getElementById('city').value;
+    const season = document.getElementById('season').value;
+    const duration = document.getElementById('duration').value;
+    
+    if (!country || !season || !duration) {
+        console.error('Missing form data for filtering');
+        return;
+    }
+    
+    // Get all events for the current search criteria
+    const allEvents = getFilteredEvents(country, city, season, duration);
+    
+    // Refresh the categories display to show updated selection
+    displayInterestCategories(allEvents);
+    
+    // Apply filtering based on current selection
+    if (selectedCategories.length === 0) {
+        // No categories selected, show all events
+        displayResults(allEvents, city || 'All Cities', country, season);
+    } else {
+        // Filter by selected categories
+        const filteredEvents = allEvents.filter(event => selectedCategories.includes(event.category));
+        
+        console.log(`Found ${filteredEvents.length} events in selected categories: ${selectedCategories.join(', ')}`);
+        
+        if (filteredEvents.length === 0) {
+            // Show message if no events found
+            const eventsContainer = document.getElementById('eventsList');
+            eventsContainer.innerHTML = `
+                <div class="text-center py-8">
+                    <div class="text-gray-400 mb-4">
+                        <svg class="mx-auto h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.5-.9-6.1-2.4l-.7.7a8.96 8.96 0 0012.6 0l-.7-.7z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">No Events Found</h3>
+                    <p class="text-gray-600 mb-4">No events found in the selected categories: <strong>${selectedCategories.join(', ')}</strong></p>
+                </div>
+            `;
+        } else {
+            // Display filtered events
+            displayEventsList(filteredEvents);
+            displaySummary(filteredEvents, city || 'All Cities', country, season);
+        }
+    }
+    
+    // Scroll to events section
+    document.getElementById('eventsList').scrollIntoView({ behavior: 'smooth' });
+}
+
+// Apply category filter
+function applyCategoryFilter() {
+    console.log('Applying category filter for:', selectedCategories);
+    
+    if (selectedCategories.length === 0) {
+        console.log('No categories selected');
+        return;
+    }
+    
+    // Get current form data to maintain context
+    const country = document.getElementById('country').value;
+    const city = document.getElementById('city').value;
+    const season = document.getElementById('season').value;
+    const duration = document.getElementById('duration').value;
+    
+    if (!country || !season || !duration) {
+        console.error('Missing form data for filtering');
+        return;
+    }
+    
+    // Get all events for the current search criteria
+    const allEvents = getFilteredEvents(country, city, season, duration);
+    
+    // Filter by selected categories
+    const filteredEvents = allEvents.filter(event => selectedCategories.includes(event.category));
+    
+    console.log(`Found ${filteredEvents.length} events in selected categories: ${selectedCategories.join(', ')}`);
+    
+    if (filteredEvents.length === 0) {
+        // Show message if no events found
+        const eventsContainer = document.getElementById('eventsList');
+        eventsContainer.innerHTML = `
+            <div class="text-center py-8">
+                <div class="text-gray-400 mb-4">
+                    <svg class="mx-auto h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.5-.9-6.1-2.4l-.7.7a8.96 8.96 0 0012.6 0l-.7-.7z" />
+                    </svg>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">No Events Found</h3>
+                <p class="text-gray-600 mb-4">No events found in the selected categories: <strong>${selectedCategories.join(', ')}</strong></p>
+                <button onclick="showAllEvents()" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                    Show All Events
+                </button>
+            </div>
+        `;
+    } else {
+        // Display filtered events
+        displayEventsList(filteredEvents);
+        
+        // Update summary to show filtered results
+        displaySummary(filteredEvents, city || 'All Cities', country, season);
+        
+        // Add a "Show All Events" button
+        const eventsContainer = document.getElementById('eventsList');
+        const showAllButton = document.createElement('div');
+        showAllButton.className = 'text-center mt-6';
+        showAllButton.innerHTML = `
+            <button onclick="showAllEvents()" class="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 transition-colors">
+                ← Show All Events
+            </button>
+        `;
+        eventsContainer.appendChild(showAllButton);
+    }
+    
+    // Scroll to events section
+    document.getElementById('eventsList').scrollIntoView({ behavior: 'smooth' });
+}
+
+// Clear category selection
+function clearCategorySelection() {
+    console.log('Clearing category selection');
+    selectedCategories = [];
+    
+    // Get current form data
+    const country = document.getElementById('country').value;
+    const city = document.getElementById('city').value;
+    const season = document.getElementById('season').value;
+    const duration = document.getElementById('duration').value;
+    
+    if (country && season && duration) {
+        const allEvents = getFilteredEvents(country, city, season, duration);
+        
+        // Refresh the categories display
+        displayInterestCategories(allEvents);
+        
+        // Show all events
+        displayResults(allEvents, city || 'All Cities', country, season);
+    }
+}
+
+// Show all events (reset filter)
+function showAllEvents() {
+    console.log('Showing all events');
+    
+    // Clear category selection
+    selectedCategories = [];
+    
+    // Get current form data
+    const country = document.getElementById('country').value;
+    const city = document.getElementById('city').value;
+    const season = document.getElementById('season').value;
+    const duration = document.getElementById('duration').value;
+    
+    if (!country || !season || !duration) {
+        console.error('Missing form data');
+        return;
+    }
+    
+    // Get all events and display them
+    const allEvents = getFilteredEvents(country, city, season, duration);
+    displayResults(allEvents, city || 'All Cities', country, season);
+}
+
 // Make functions globally accessible for onclick handlers
 window.showEventDetails = showEventDetails;
 window.showRatingModal = showRatingModal;
 window.submitRating = submitRating;
+window.toggleCategory = toggleCategory;
+window.clearCategorySelection = clearCategorySelection;
+window.showAllEvents = showAllEvents;
 
 // Debug: Check if functions are properly assigned
 console.log('Global functions assigned:');
