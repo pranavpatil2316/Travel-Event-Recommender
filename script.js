@@ -33,11 +33,6 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeForm();
     setDefaultSeason();
     loadInitialEvents();
-    
-    // Make functions globally accessible for onclick handlers
-    window.showEventDetails = showEventDetails;
-    window.showRatingModal = showRatingModal;
-    window.submitRating = submitRating;
 });
 
 // Load initial events from local JSON files
@@ -363,6 +358,19 @@ function displayInterestCategories(events) {
 function displayEventsList(events) {
     const eventsContainer = document.getElementById('eventsList');
     
+    console.log('displayEventsList called with', events.length, 'events');
+    console.log('Global functions available:', {
+        showEventDetails: typeof window.showEventDetails,
+        showRatingModal: typeof window.showRatingModal,
+        submitRating: typeof window.submitRating
+    });
+    
+    // Debug: Check first event structure
+    if (events.length > 0) {
+        console.log('First event structure:', events[0]);
+        console.log('First event ID:', events[0].id, 'Type:', typeof events[0].id);
+    }
+    
     eventsContainer.innerHTML = events.map(event => `
         <div class="event-card bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
             <div class="flex justify-between items-start mb-3">
@@ -396,10 +404,10 @@ function displayEventsList(events) {
                 </div>
             </div>
             <div class="mt-4 flex space-x-3">
-                <button onclick="showEventDetails(${event.id})" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors">
+                <button onclick="console.log('View Details clicked for event:', '${event.id}'); showEventDetails('${event.id}')" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors">
                     View Details
                 </button>
-                <button onclick="showRatingModal(${event.id})" class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors">
+                <button onclick="console.log('Rate Event clicked for event:', '${event.id}'); showRatingModal('${event.id}')" class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors">
                     Rate Event
                 </button>
             </div>
@@ -475,8 +483,147 @@ function showEventDetails(eventId) {
         return;
     }
 
-    alert(`Event Details:\n\n${event.title}\n\n${event.description}\n\nCategory: ${event.category}\nLocation: ${event.city}, ${event.country}\nTime: ${formatDateTime(event.start_time)} - ${formatDateTime(event.end_time)}\nRating: ${event.rating.toFixed(1)} ⭐ (${event.ratingCount} reviews)`);
+    // Create modal overlay
+    const modalOverlay = document.createElement('div');
+    modalOverlay.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+    modalOverlay.onclick = () => modalOverlay.remove();
+
+    // Create modal content
+    const modalContent = document.createElement('div');
+    modalContent.className = 'bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto';
+    modalContent.onclick = (e) => e.stopPropagation();
+
+    // Calculate additional information
+    const startDate = new Date(event.start_time);
+    const endDate = new Date(event.end_time);
+    const duration = Math.round((endDate - startDate) / (1000 * 60 * 60)); // hours
+    const isWeekend = startDate.getDay() === 0 || startDate.getDay() === 6;
+    const season = getSeasonFromDate(startDate);
+    const timeOfDay = getTimeOfDay(startDate);
+    
+    // Generate additional content based on event category
+    const additionalInfo = getAdditionalEventInfo(event);
+    
+    modalContent.innerHTML = `
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-2xl font-semibold text-gray-800">Event Details</h3>
+            <button onclick="this.closest('.fixed').remove()" class="text-gray-500 hover:text-gray-700 text-3xl">&times;</button>
+        </div>
+        
+        <div class="space-y-6">
+            <!-- Event Title and Rating -->
+            <div class="border-b border-gray-200 pb-4">
+                <h4 class="text-xl font-bold text-gray-800 mb-2">${event.title}</h4>
+                <div class="flex items-center space-x-4">
+                    <div class="bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-sm px-3 py-1 rounded-full">
+                        ${event.rating.toFixed(1)} ⭐
+                    </div>
+                    <span class="text-gray-600">${event.ratingCount} reviews</span>
+                    ${event.source !== 'Sample' ? `<span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">${event.source}</span>` : ''}
+                </div>
+            </div>
+            
+            <!-- Enhanced Description -->
+            <div>
+                <h5 class="font-semibold text-gray-800 mb-2">About This Experience</h5>
+                <p class="text-gray-600 leading-relaxed mb-3">${event.description}</p>
+                ${additionalInfo.description ? `<p class="text-gray-600 leading-relaxed italic">${additionalInfo.description}</p>` : ''}
+            </div>
+            
+            <!-- Event Information Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h6 class="font-semibold text-gray-800 mb-2">Category</h6>
+                    <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">${event.category}</span>
+                </div>
+                
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h6 class="font-semibold text-gray-800 mb-2">Location</h6>
+                    <div class="flex items-center space-x-2">
+                        <span class="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm">${event.city}</span>
+                        <span class="text-gray-600">${event.country}</span>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h6 class="font-semibold text-gray-800 mb-2">Type</h6>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-lg">${event.indoor_outdoor === 'indoor' ? '🏠' : '🌳'}</span>
+                        <span class="capitalize text-gray-600">${event.indoor_outdoor}</span>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h6 class="font-semibold text-gray-800 mb-2">Duration</h6>
+                    <p class="text-gray-600 text-sm">
+                        ${formatDateTime(event.start_time)}<br>
+                        to ${formatDateTime(event.end_time)}<br>
+                        <span class="text-blue-600 font-medium">${duration} hours</span>
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Additional Information -->
+            <div class="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg border border-blue-200">
+                <h5 class="font-semibold text-gray-800 mb-3">Event Insights</h5>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                    <div class="text-center">
+                        <div class="text-lg">${isWeekend ? '🎉' : '📅'}</div>
+                        <div class="text-gray-600">${isWeekend ? 'Weekend' : 'Weekday'}</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-lg">${getSeasonEmoji(season)}</div>
+                        <div class="text-gray-600">${season}</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-lg">${getTimeEmoji(timeOfDay)}</div>
+                        <div class="text-gray-600">${timeOfDay}</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-lg">${getWeatherEmoji(event.indoor_outdoor, season)}</div>
+                        <div class="text-gray-600">${event.indoor_outdoor === 'indoor' ? 'All Weather' : 'Weather Dependent'}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- What to Expect -->
+            ${additionalInfo.whatToExpect ? `
+            <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+                <h5 class="font-semibold text-gray-800 mb-2">What to Expect</h5>
+                <ul class="text-gray-600 text-sm space-y-1">
+                    ${additionalInfo.whatToExpect.map(item => `<li>• ${item}</li>`).join('')}
+                </ul>
+            </div>
+            ` : ''}
+            
+            <!-- Tips & Recommendations -->
+            <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                <h5 class="font-semibold text-gray-800 mb-2">💡 Tips & Recommendations</h5>
+                <ul class="text-gray-600 text-sm space-y-1">
+                    <li>• Book in advance to secure your spot</li>
+                    <li>• Arrive 15 minutes early for check-in</li>
+                    <li>• ${event.indoor_outdoor === 'outdoor' ? 'Check weather conditions and dress appropriately' : 'Comfortable walking shoes recommended'}</li>
+                    <li>• Bring a camera to capture memories</li>
+                    <li>• Consider bringing water and snacks</li>
+                </ul>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="flex space-x-3 pt-4 border-t border-gray-200">
+                <button onclick="showRatingModal('${event.id}'); this.closest('.fixed').remove();" class="flex-1 bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 transition-colors">
+                    Rate This Event
+                </button>
+                <button onclick="this.closest('.fixed').remove()" class="flex-1 bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600 transition-colors">
+                    Close
+                </button>
+            </div>
+        </div>
+    `;
+
+    modalOverlay.appendChild(modalContent);
+    document.body.appendChild(modalOverlay);
 }
+
 
 // Show rating modal with star rating
 function showRatingModal(eventId) {
@@ -633,4 +780,123 @@ function submitRating(eventId) {
         const filteredEvents = getFilteredEvents(country, city, season, duration);
         displayResults(filteredEvents, city || 'All Cities', country, season);
     }
+}
+
+// Make functions globally accessible for onclick handlers
+window.showEventDetails = showEventDetails;
+window.showRatingModal = showRatingModal;
+window.submitRating = submitRating;
+
+// Debug: Check if functions are properly assigned
+console.log('Global functions assigned:');
+console.log('window.showEventDetails:', typeof window.showEventDetails);
+console.log('window.showRatingModal:', typeof window.showRatingModal);
+console.log('window.submitRating:', typeof window.submitRating);
+
+// Helper functions for enhanced event details
+function getSeasonFromDate(date) {
+    const month = date.getMonth() + 1;
+    if (month >= 3 && month <= 5) return 'Spring';
+    if (month >= 6 && month <= 8) return 'Summer';
+    if (month >= 9 && month <= 11) return 'Autumn';
+    return 'Winter';
+}
+
+function getTimeOfDay(date) {
+    const hour = date.getHours();
+    if (hour >= 5 && hour < 12) return 'Morning';
+    if (hour >= 12 && hour < 17) return 'Afternoon';
+    if (hour >= 17 && hour < 21) return 'Evening';
+    return 'Night';
+}
+
+function getSeasonEmoji(season) {
+    const emojis = {
+        'Spring': '🌸',
+        'Summer': '☀️',
+        'Autumn': '🍂',
+        'Winter': '❄️'
+    };
+    return emojis[season] || '📅';
+}
+
+function getTimeEmoji(timeOfDay) {
+    const emojis = {
+        'Morning': '🌅',
+        'Afternoon': '☀️',
+        'Evening': '🌆',
+        'Night': '🌙'
+    };
+    return emojis[timeOfDay] || '🕐';
+}
+
+function getWeatherEmoji(indoorOutdoor, season) {
+    if (indoorOutdoor === 'indoor') return '🏠';
+    const weatherEmojis = {
+        'Spring': '🌦️',
+        'Summer': '☀️',
+        'Autumn': '🍂',
+        'Winter': '❄️'
+    };
+    return weatherEmojis[season] || '🌤️';
+}
+
+function getAdditionalEventInfo(event) {
+    const categoryInfo = {
+        'Sightseeing': {
+            description: 'Perfect for first-time visitors and photography enthusiasts. This experience offers iconic views and memorable moments.',
+            whatToExpect: [
+                'Guided tour with historical context',
+                'Photo opportunities at key landmarks',
+                'Local insights and stories',
+                'Small group experience for personalized attention'
+            ]
+        },
+        'History & Heritage': {
+            description: 'Dive deep into the rich cultural heritage and historical significance of this remarkable location.',
+            whatToExpect: [
+                'Expert guide with historical knowledge',
+                'Access to restricted areas',
+                'Interactive exhibits and artifacts',
+                'Cultural context and significance'
+            ]
+        },
+        'Adventure': {
+            description: 'Get your adrenaline pumping with this exciting outdoor adventure experience.',
+            whatToExpect: [
+                'Safety equipment provided',
+                'Professional instructors',
+                'Thrilling activities and challenges',
+                'Group bonding experience'
+            ]
+        },
+        'Food & Drink': {
+            description: 'Savor the authentic flavors and culinary traditions of the local culture.',
+            whatToExpect: [
+                'Local food tastings',
+                'Traditional cooking methods',
+                'Cultural food stories',
+                'Recipe sharing and tips'
+            ]
+        },
+        'Nature & Wildlife': {
+            description: 'Connect with nature and discover the local wildlife in their natural habitat.',
+            whatToExpect: [
+                'Wildlife spotting opportunities',
+                'Nature photography tips',
+                'Environmental education',
+                'Peaceful natural settings'
+            ]
+        }
+    };
+    
+    return categoryInfo[event.category] || {
+        description: 'A unique experience that combines local culture, history, and entertainment.',
+        whatToExpect: [
+            'Professional guidance',
+            'Cultural insights',
+            'Memorable experiences',
+            'Local recommendations'
+        ]
+    };
 }
