@@ -1,0 +1,31 @@
+#map { 
+    height: 400px; 
+}
+
+.event-card {
+    transition: transform 0.2s ease-in-out;
+}
+
+.event-card:hover {
+    transform: translateY(-2px);
+}
+
+.star-rating {
+    display: inline-flex;
+    gap: 2px;
+}
+
+.star {
+    cursor: pointer;
+    font-size: 20px;
+    color: #d1d5db;
+    transition: color 0.2s;
+}
+
+.star.active {
+    color: #fbbf24;
+}
+
+.star:hover {
+    color: #f59e0b;
+}
