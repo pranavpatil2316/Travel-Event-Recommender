@@ -33,6 +33,11 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeForm();
     setDefaultSeason();
     loadInitialEvents();
+    
+    // Make functions globally accessible for onclick handlers
+    window.showEventDetails = showEventDetails;
+    window.showRatingModal = showRatingModal;
+    window.submitRating = submitRating;
 });
 
 // Load initial events from local JSON files
@@ -459,16 +464,30 @@ function formatDateTime(dateTimeString) {
 
 // Show event details
 function showEventDetails(eventId) {
+    console.log('showEventDetails called with ID:', eventId);
+    console.log('eventsData length:', eventsData.length);
     const event = eventsData.find(e => e.id === eventId);
-    if (!event) return;
+    console.log('Found event:', event);
+    
+    if (!event) {
+        console.error('Event not found with ID:', eventId);
+        alert('Event details not found. Please try again.');
+        return;
+    }
 
     alert(`Event Details:\n\n${event.title}\n\n${event.description}\n\nCategory: ${event.category}\nLocation: ${event.city}, ${event.country}\nTime: ${formatDateTime(event.start_time)} - ${formatDateTime(event.end_time)}\nRating: ${event.rating.toFixed(1)} ⭐ (${event.ratingCount} reviews)`);
 }
 
 // Show rating modal with star rating
 function showRatingModal(eventId) {
+    console.log('showRatingModal called with ID:', eventId);
     const event = eventsData.find(e => e.id === eventId);
-    if (!event) return;
+    console.log('Found event for rating:', event);
+    if (!event) {
+        console.error('Event not found for rating with ID:', eventId);
+        alert('Event not found. Please try again.');
+        return;
+    }
 
     // Create modal overlay
     const modalOverlay = document.createElement('div');
