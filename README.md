@@ -1,26 +1,33 @@
-# Travel + Event Hybrid Recommender Website
+# Travel Event Recommender Website
 
 A modern, responsive web application that combines travel planning with event discovery. Users can select a destination, choose their travel season, and discover relevant events with detailed information, ratings, and reviews.
 
 ## 🚀 **Quick Start**
 
-1. **Download** all files to the same directory
+1. **Clone or download** all files to the same directory
 2. **Open** `index.html` in a web browser
-3. **Select** a country and season
-4. **Click** "Show All Events" to see results
+3. **Select** a country, optional city, season, and duration
+4. **Click** "Get Recommendations" to see results
+5. **Explore** events on the interactive map and read reviews
 
 ## ✨ **Features**
 
 ### 🌍 **Country-First Destination Selection**
 - Select from 19 countries worldwide with comprehensive event data
-- Dynamic city loading using REST Countries API
+- Dynamic city loading with predefined city lists for each country
 - Optional city selection (leave empty to see all country events)
-- Fallback to predefined cities if API fails
+- Fallback to predefined cities for reliable functionality
 
 ### 🗓️ **Season-Based Travel Planning**
 - Choose from Spring, Summer, Autumn, or Winter
 - Automatic season detection based on current month
 - Season-appropriate event recommendations
+
+### ⏱️ **Duration-Based Recommendations**
+- Weekend trips (2-3 days)
+- Week-long vacations (7 days)
+- Extended stays (2+ weeks)
+- Duration-appropriate event suggestions
 
 ### ⭐ **5-Star Rating System**
 - User-driven ratings and reviews
@@ -40,11 +47,12 @@ A modern, responsive web application that combines travel planning with event di
 - Automatic map centering based on events
 
 ### 📊 **Comprehensive Event Data**
-- Multiple event categories (Art & Culture, History & Heritage, etc.)
+- Multiple event categories (Art & Culture, History & Heritage, Entertainment, etc.)
 - Detailed event descriptions and information
 - Pre-loaded event data for 19 countries with 1000+ events
 - Real coordinates and location data for accurate mapping
 - Event ratings and review counts for better recommendations
+- Indoor/outdoor classification for weather considerations
 
 ## 🛠️ **Technology Stack**
 
@@ -52,15 +60,17 @@ A modern, responsive web application that combines travel planning with event di
 - **Styling**: TailwindCSS (via CDN)
 - **Maps**: LeafletJS with OpenStreetMap tiles
 - **Storage**: IndexedDB for client-side data persistence
-- **APIs**: REST Countries API, Nominatim (OpenStreetMap)
 - **Data**: JSON files with comprehensive event data for 19 countries
 - **Deployment**: Netlify-ready with CLI support
+- **Package Management**: npm with Supabase integration ready
 
 ## 📁 **File Structure**
 
 ```
 travel-event-recommender-website/
 ├── index.html              # Main HTML file with embedded JavaScript
+├── script.js               # JavaScript functionality and event handling
+├── styles.css              # Custom CSS styles and animations
 ├── package.json            # Project metadata and dependencies
 ├── README.md               # This file
 └── events/                 # Event data directory
@@ -86,22 +96,22 @@ travel-event-recommender-website/
 
 ## 🚨 **Troubleshooting**
 
-### **Page Refreshes When Clicking "Show All Events"**
+### **Page Refreshes When Clicking "Get Recommendations"**
 **Symptoms**: Page reloads instead of showing results
 **Solutions**:
 1. **Check Browser Console**: Press F12 → Console tab, look for errors
 2. **Verify Files**: Ensure all files are in the same directory
-3. **Test Minimal Version**: Try `test_minimal.html` to isolate issues
-4. **Clear Browser Cache**: Hard refresh (Ctrl+F5) or clear cache
-5. **Check JavaScript**: Ensure JavaScript is enabled in browser
+3. **Clear Browser Cache**: Hard refresh (Ctrl+F5) or clear cache
+4. **Check JavaScript**: Ensure JavaScript is enabled in browser
+5. **Verify Event Files**: Ensure all JSON files exist in the `events/` directory
 
 ### **City Dropdown Not Working**
 **Symptoms**: Cities don't load when selecting a country
 **Solutions**:
-1. **Check Internet Connection**: API calls require internet
-2. **Try Different Country**: Some countries may have API issues
-3. **Wait for Loading**: Cities load with a 500ms delay
-4. **Check Console**: Look for API error messages
+1. **Check Console**: Look for JavaScript errors in browser console
+2. **Try Different Country**: Some countries may have predefined city lists
+3. **Wait for Loading**: Cities load with a slight delay
+4. **Verify Script**: Ensure `script.js` is properly loaded
 
 ### **Events Not Displaying**
 **Symptoms**: No events show after form submission
@@ -143,25 +153,24 @@ travel-event-recommender-website/
 - **Edge**: Full support ✅
 - **Mobile browsers**: Responsive design works on all devices ✅
 
-## 🌐 **API Dependencies**
+## 🌐 **Dependencies**
 
-### **Required APIs**
-- **REST Countries API**: For country and city data
-- **Nominatim (OpenStreetMap)**: For geocoding
-- **TailwindCSS CDN**: For styling
-- **LeafletJS CDN**: For maps
+### **CDN Resources**
+- **TailwindCSS CDN**: For styling and responsive design
+- **LeafletJS CDN**: For interactive maps
+- **OpenStreetMap**: For map tiles and geocoding
 
 ### **Offline Mode**
 - Basic functionality works without internet
-- City loading and maps require internet connection
-- Sample events work offline
+- Maps require internet connection for tiles
+- All event data is stored locally in JSON files
 
 ## 🚀 **Deployment**
 
 ### **Local Development**
-1. Download all files
-2. Open `index.html` in browser
-3. No server required
+1. Clone or download all files to a directory
+2. Open `index.html` in a web browser
+3. No server required - runs entirely client-side
 
 ### **Web Hosting**
 1. Upload all files to web server
@@ -175,37 +184,65 @@ travel-event-recommender-website/
 
 ## 📊 **Performance Features**
 
-- **API caching**: Reduces redundant API calls
-- **Lazy loading**: Events loaded on demand
-- **Optimized images**: Efficient map tile loading
-- **Responsive design**: Fast loading on all devices
-- **IndexedDB**: Fast local storage for ratings/reviews
+- **Local data storage**: All event data stored in JSON files for fast access
+- **Lazy loading**: Events loaded on demand based on user selection
+- **Optimized maps**: Efficient map tile loading with LeafletJS
+- **Responsive design**: Fast loading on all devices with TailwindCSS
+- **IndexedDB**: Fast local storage for ratings/reviews persistence
+- **Client-side processing**: No server required for core functionality
 
 ## 🔮 **Future Enhancements**
 
-- [ ] Real event API integration
-- [ ] User authentication system
+- [ ] Real event API integration (Eventbrite, Meetup, etc.)
+- [ ] User authentication system with Supabase
 - [ ] Social sharing features
-- [ ] Advanced filtering options
-- [ ] Calendar integration
-- [ ] Offline mode support
+- [ ] Advanced filtering options (price, date, category)
+- [ ] Calendar integration (Google Calendar, iCal)
+- [ ] Enhanced offline mode support
 - [ ] Multi-language support
-- [ ] Dark mode theme
+- [ ] Dark mode theme toggle
 - [ ] Progressive Web App (PWA) features
+- [ ] User favorites and wishlist
+- [ ] Event booking integration
+- [ ] Weather-based recommendations
 
 ## 📞 **Support**
 
 ### **Getting Help**
-1. **Check Console**: Always check browser console first
+1. **Check Console**: Always check browser console first (F12 → Console)
 2. **Verify Files**: Ensure all event JSON files are present in the `events/` directory
-3. **Clear Cache**: Clear browser cache and try again
-4. **Check Internet**: Ensure internet connection for API calls
+3. **Clear Cache**: Clear browser cache and try again (Ctrl+F5)
+4. **Check Internet**: Ensure internet connection for map tiles
+5. **Test Different Browser**: Try Chrome, Firefox, or Edge
 
 ### **Common Issues**
 - **Page refreshes**: Check console for JavaScript errors
-- **Cities not loading**: Check internet connection and API status
+- **Cities not loading**: Check JavaScript console for errors
 - **Events not showing**: Verify event JSON files exist in `events/` directory
 - **Ratings not saving**: Check IndexedDB support in browser
+- **Map not loading**: Check internet connection for map tiles
+
+## 🏗️ **Project Architecture**
+
+### **Frontend Structure**
+- **HTML**: Semantic markup with accessibility features
+- **CSS**: Custom styles with TailwindCSS for responsive design
+- **JavaScript**: ES6+ with modern features and async/await
+- **Data**: JSON files with structured event information
+
+### **Data Flow**
+1. User selects country, city, season, and duration
+2. Application loads relevant event data from JSON files
+3. Events are filtered and sorted by rating
+4. Results displayed with interactive map
+5. User interactions (ratings, reviews) stored in IndexedDB
+
+### **Key Components**
+- **Form Handler**: Manages user input and validation
+- **Event Loader**: Fetches and processes event data
+- **Map Manager**: Handles LeafletJS map interactions
+- **Rating System**: Manages user reviews and ratings
+- **Storage Manager**: Handles IndexedDB operations
 
 ## 📄 **License**
 
