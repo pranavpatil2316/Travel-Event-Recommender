@@ -1,0 +1,107 @@
+{
+  "country": "United States",
+  "cities": {
+    "New York": [
+      {
+        "id": "usa_ny_1",
+        "title": "Statue of Liberty Tour",
+        "description": "Visit the iconic Statue of Liberty and Ellis Island. Learn about American immigration history.",
+        "category": "History & Heritage",
+        "start_time": "2024-03-20T09:00:00Z",
+        "end_time": "2024-03-20T12:00:00Z",
+        "lat": 40.6892,
+        "lon": -74.0445,
+        "city": "New York",
+        "country": "United States",
+        "indoor_outdoor": "outdoor",
+        "rating": 4.7,
+        "ratingCount": 1890,
+        "source": "Local Events"
+      },
+      {
+        "id": "usa_ny_2",
+        "title": "Broadway Show Experience",
+        "description": "Watch a world-class Broadway musical performance. Includes dinner at a nearby restaurant.",
+        "category": "Entertainment",
+        "start_time": "2024-03-22T19:30:00Z",
+        "end_time": "2024-03-22T22:30:00Z",
+        "lat": 40.7589,
+        "lon": -73.9851,
+        "city": "New York",
+        "country": "United States",
+        "indoor_outdoor": "indoor",
+        "rating": 4.9,
+        "ratingCount": 2156,
+        "source": "Local Events"
+      },
+      {
+        "id": "usa_ny_3",
+        "title": "Central Park Bike Tour",
+        "description": "Explore Central Park by bike with a knowledgeable guide. See famous landmarks and hidden gems.",
+        "category": "Adventure & Sports",
+        "start_time": "2024-03-25T10:00:00Z",
+        "end_time": "2024-03-25T13:00:00Z",
+        "lat": 40.7829,
+        "lon": -73.9654,
+        "city": "New York",
+        "country": "United States",
+        "indoor_outdoor": "outdoor",
+        "rating": 4.5,
+        "ratingCount": 743,
+        "source": "Local Events"
+      }
+    ],
+    "Los Angeles": [
+      {
+        "id": "usa_la_1",
+        "title": "Hollywood Walk of Fame Tour",
+        "description": "Walk the famous Hollywood Walk of Fame and visit celebrity handprints at TCL Chinese Theatre.",
+        "category": "Entertainment",
+        "start_time": "2024-03-21T14:00:00Z",
+        "end_time": "2024-03-21T17:00:00Z",
+        "lat": 34.1016,
+        "lon": -118.3267,
+        "city": "Los Angeles",
+        "country": "United States",
+        "indoor_outdoor": "outdoor",
+        "rating": 4.3,
+        "ratingCount": 567,
+        "source": "Local Events"
+      },
+      {
+        "id": "usa_la_2",
+        "title": "Santa Monica Beach Day",
+        "description": "Enjoy a relaxing day at Santa Monica Beach with pier activities and sunset views.",
+        "category": "Sightseeing",
+        "start_time": "2024-03-24T11:00:00Z",
+        "end_time": "2024-03-24T18:00:00Z",
+        "lat": 34.0195,
+        "lon": -118.4912,
+        "city": "Los Angeles",
+        "country": "United States",
+        "indoor_outdoor": "outdoor",
+        "rating": 4.6,
+        "ratingCount": 892,
+        "source": "Local Events"
+      }
+    ],
+    "Chicago": [
+      {
+        "id": "usa_chicago_1",
+        "title": "Chicago Architecture River Cruise",
+        "description": "Take a scenic river cruise to admire Chicago's famous architecture and skyline.",
+        "category": "Sightseeing",
+        "start_time": "2024-03-23T15:00:00Z",
+        "end_time": "2024-03-23T17:00:00Z",
+        "lat": 41.8781,
+        "lon": -87.6298,
+        "city": "Chicago",
+        "country": "United States",
+        "indoor_outdoor": "outdoor",
+        "rating": 4.8,
+        "ratingCount": 1245,
+        "source": "Local Events"
+      }
+    ]
+  }
+}

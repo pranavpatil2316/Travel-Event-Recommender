@@ -1,0 +1,57 @@
+{
+  "country": "Australia",
+  "cities": {
+    "Sydney": [
+      {
+        "id": "australia_sydney_1",
+        "title": "Sydney Opera House Tour",
+        "description": "Explore the iconic Sydney Opera House with a guided tour. Learn about its unique architecture and history.",
+        "category": "Art & Culture",
+        "start_time": "2024-03-18T14:00:00Z",
+        "end_time": "2024-03-18T16:00:00Z",
+        "lat": -33.8568,
+        "lon": 151.2153,
+        "city": "Sydney",
+        "country": "Australia",
+        "indoor_outdoor": "indoor",
+        "rating": 4.9,
+        "ratingCount": 2156,
+        "source": "Local Events"
+      },
+      {
+        "id": "australia_sydney_2",
+        "title": "Harbour Bridge Climb",
+        "description": "Climb the famous Sydney Harbour Bridge for breathtaking views of the harbor and city skyline.",
+        "category": "Adventure & Sports",
+        "start_time": "2024-03-21T08:00:00Z",
+        "end_time": "2024-03-21T11:00:00Z",
+        "lat": -33.8523,
+        "lon": 151.2108,
+        "city": "Sydney",
+        "country": "Australia",
+        "indoor_outdoor": "outdoor",
+        "rating": 4.8,
+        "ratingCount": 1245,
+        "source": "Local Events"
+      }
+    ],
+    "Melbourne": [
+      {
+        "id": "australia_melbourne_1",
+        "title": "Great Ocean Road Day Trip",
+        "description": "Take a scenic drive along the Great Ocean Road to see the Twelve Apostles and stunning coastal views.",
+        "category": "Sightseeing",
+        "start_time": "2024-03-24T07:00:00Z",
+        "end_time": "2024-03-24T19:00:00Z",
+        "lat": -38.6806,
+        "lon": 143.3906,
+        "city": "Melbourne",
+        "country": "Australia",
+        "indoor_outdoor": "outdoor",
+        "rating": 4.7,
+        "ratingCount": 892,
+        "source": "Local Events"
+      }
+    ]
+  }
+}

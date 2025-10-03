@@ -1,0 +1,30 @@
+{
+  "name": "travel-event-recommender",
+  "version": "1.0.0",
+  "description": "Travel and Event Recommender Website with Backend API",
+  "main": "index.html",
+  "scripts": {
+    "build": "echo 'No build step required for static site'",
+    "dev": "node server.js",
+    "start": "node server.js",
+    "vercel": "vercel dev"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "mongodb": "^6.0.0"
+  },
+  "devDependencies": {
+    "vercel": "^32.0.0"
+  },
+  "keywords": [
+    "travel",
+    "events",
+    "recommender",
+    "mongodb",
+    "vercel",
+    "api"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}
