@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -7,8 +8,13 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // MongoDB connection
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://pranavpatil:P%40ssword%40123@eventrecommendation.txgjlqp.mongodb.net/travel_events?retryWrites=true&w=majority';
+const MONGODB_URI = process.env.MONGODB_URI;
 const MONGODB_DB = process.env.MONGODB_DB || 'travel_events';
+
+if (!MONGODB_URI) {
+  console.error('MONGODB_URI environment variable is not defined. Please check your .env file.');
+  process.exit(1);
+}
 
 let db;
 
@@ -34,6 +40,9 @@ async function connectToDatabase() {
 // Reviews API
 app.get('/api/reviews', async (req, res) => {
   try {
+    if (!db) {
+      return res.status(500).json({ success: false, error: 'Database not connected' });
+    }
     const { eventId } = req.query;
     const reviewsCollection = db.collection('reviews');
     
@@ -58,6 +67,9 @@ app.get('/api/reviews', async (req, res) => {
 
 app.post('/api/reviews', async (req, res) => {
   try {
+    if (!db) {
+      return res.status(500).json({ success: false, error: 'Database not connected' });
+    }
     const { eventId, rating, review, userName } = req.body;
     const reviewsCollection = db.collection('reviews');
 
@@ -92,6 +104,9 @@ app.post('/api/reviews', async (req, res) => {
 // Likes API
 app.get('/api/likes', async (req, res) => {
   try {
+    if (!db) {
+      return res.status(500).json({ success: false, error: 'Database not connected' });
+    }
     const { userId, eventId } = req.query;
     const likesCollection = db.collection('likes');
     
@@ -119,6 +134,9 @@ app.get('/api/likes', async (req, res) => {
 
 app.post('/api/likes', async (req, res) => {
   try {
+    if (!db) {
+      return res.status(500).json({ success: false, error: 'Database not connected' });
+    }
     const { userId, eventId } = req.body;
     const likesCollection = db.collection('likes');
 
@@ -160,6 +178,9 @@ app.post('/api/likes', async (req, res) => {
 
 app.delete('/api/likes', async (req, res) => {
   try {
+    if (!db) {
+      return res.status(500).json({ success: false, error: 'Database not connected' });
+    }
     const { userId, eventId } = req.query;
     const likesCollection = db.collection('likes');
 
@@ -196,6 +217,9 @@ app.delete('/api/likes', async (req, res) => {
 // Recommendations API
 app.get('/api/recommendations', async (req, res) => {
   try {
+    if (!db) {
+      return res.status(500).json({ success: false, error: 'Database not connected' });
+    }
     const { userId, country, limit = 10 } = req.query;
     const likesCollection = db.collection('likes');
     const reviewsCollection = db.collection('reviews');

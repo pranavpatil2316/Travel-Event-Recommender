@@ -14,9 +14,53 @@ A modern, responsive full-stack web application that combines travel planning wi
 ### Option 2: Full Stack with Backend (Recommended)
 1. **Set up MongoDB Atlas** and get connection string
 2. **Install dependencies**: `npm install`
-3. **Configure environment variables** in `.env.local`
+3. **Create `.env` file** with your MongoDB credentials (see Environment Variables section below)
 4. **Start development server**: `npm start`
 5. **Deploy to Vercel**: `vercel --prod`
+
+## 🔐 **Environment Variables Setup**
+
+To run this project with full backend functionality, you need to create a `.env` file in the root directory with your MongoDB Atlas credentials.
+
+### **Required Environment Variables:**
+
+Create a `.env` file in the project root with the following variables:
+
+```env
+# MongoDB Atlas Connection String
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/database_name?retryWrites=true&w=majority
+MONGODB_DB=travel_events
+
+# API Base URL (for local development)
+API_BASE_URL=http://localhost:3000/api
+
+# For production, this will be your Vercel deployment URL
+# API_BASE_URL=https://your-app.vercel.app/api
+```
+
+### **Steps to Set Up:**
+
+1. **Create MongoDB Atlas Account**:
+   - Go to [MongoDB Atlas](https://www.mongodb.com/atlas)
+   - Create a free account and cluster
+   - Get your connection string
+
+2. **Create `.env` File**:
+   - Create a new file named `.env` in the project root directory
+   - Add your MongoDB connection string and other variables as shown above
+   - Replace `username`, `password`, and `cluster` with your actual MongoDB Atlas credentials
+
+3. **Security Note**:
+   - The `.env` file is automatically ignored by git (included in `.gitignore`)
+   - Never commit your `.env` file to version control
+   - Keep your MongoDB credentials secure
+
+### **Example `.env` File:**
+```env
+MONGODB_URI=mongodb+srv://myuser:mypassword@cluster0.abc123.mongodb.net/travel_events?retryWrites=true&w=majority
+MONGODB_DB=travel_events
+API_BASE_URL=http://localhost:3000/api
+```
 
 ## 🆕 **New Backend Features**
 
@@ -113,20 +157,23 @@ A modern, responsive full-stack web application that combines travel planning wi
 ## 📁 **File Structure**
 
 ```
-travel-event-recommender-website/
+travel-event-recommender/
 ├── index.html              # Main HTML file
 ├── script.js               # Frontend JavaScript with API integration
 ├── styles.css              # Custom CSS styles and animations
-├── server.js               # Local development server
+├── server.js               # Local development server with MongoDB integration
 ├── package.json            # Project dependencies and scripts
+├── package-lock.json       # Dependency lock file
 ├── vercel.json             # Vercel deployment configuration
-├── env.local               # Environment variables (MongoDB connection)
+├── .env                    # Environment variables (MongoDB connection) - CREATE THIS FILE
+├── .gitignore              # Git ignore file (includes .env)
 ├── README.md               # This file
 ├── api/                    # Backend API endpoints (Vercel serverless functions)
 │   ├── db.js               # MongoDB connection
 │   ├── reviews.js          # Reviews API endpoint
 │   ├── likes.js            # Likes API endpoint
-│   └── recommendations.js  # Recommendations API endpoint
+│   ├── recommendations.js  # Recommendations API endpoint
+│   └── test.js             # API testing utilities
 └── events/                 # Event data directory
     ├── events-argentina.json
     ├── events-australia.json
@@ -180,10 +227,11 @@ travel-event-recommender-website/
 **Symptoms**: Ratings/reviews not saving or loading, recommendations not working
 **Solutions**:
 1. **Check Server Status**: Ensure `npm start` is running
-2. **Verify MongoDB Connection**: Check `.env.local` file has correct connection string
+2. **Verify MongoDB Connection**: Check `.env` file has correct connection string
 3. **Check Console**: Look for API error messages in browser console
 4. **Test API Endpoints**: Verify `/api/reviews`, `/api/likes`, `/api/recommendations` are accessible
 5. **Clear Browser Cache**: Clear localStorage and try again
+6. **Verify .env File**: Ensure `.env` file exists in project root with proper MongoDB credentials
 
 ## 🔧 **Development & Testing**
 
@@ -226,7 +274,7 @@ travel-event-recommender-website/
 ### **Local Development**
 1. **Clone or download** all files to a directory
 2. **Install dependencies**: `npm install`
-3. **Configure MongoDB**: Set up `.env.local` with your MongoDB Atlas connection string
+3. **Create `.env` file**: Add your MongoDB Atlas connection string (see Environment Variables section)
 4. **Start server**: `npm start`
 5. **Open browser**: Navigate to `http://localhost:3000`
 
