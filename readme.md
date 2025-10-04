@@ -29,7 +29,7 @@ Create a `.env` file in the project root with the following variables:
 ```env
 # MongoDB Atlas Connection String
 MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/database_name?retryWrites=true&w=majority
-MONGODB_DB=travel_events
+MONGODB_DB=your_database_name
 
 # API Base URL (for local development)
 API_BASE_URL=http://localhost:3000/api
@@ -48,7 +48,8 @@ API_BASE_URL=http://localhost:3000/api
 2. **Create `.env` File**:
    - Create a new file named `.env` in the project root directory
    - Add your MongoDB connection string and other variables as shown above
-   - Replace `username`, `password`, and `cluster` with your actual MongoDB Atlas credentials
+   - Replace `username`, `password`, `cluster`, and `database_name` with your actual MongoDB Atlas credentials
+   - Replace `your_database_name` with your preferred database name (e.g., `travel_events`, `my_travel_app`, etc.)
 
 3. **Security Note**:
    - The `.env` file is automatically ignored by git (included in `.gitignore`)
@@ -61,6 +62,13 @@ MONGODB_URI=mongodb+srv://myuser:mypassword@cluster0.abc123.mongodb.net/travel_e
 MONGODB_DB=travel_events
 API_BASE_URL=http://localhost:3000/api
 ```
+
+**Note**: You can use any database name you prefer. Common examples include:
+- `travel_events`
+- `my_travel_app`
+- `event_recommender`
+- `travel_planner`
+- Or any custom name that makes sense for your project
 
 ## 🆕 **New Backend Features**
 
